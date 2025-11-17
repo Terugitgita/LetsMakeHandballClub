@@ -171,13 +171,38 @@ function renderMainScreen(container) {
     actionDiv.appendChild(tournamentBtn);
 
     // Reset button (add to action buttons for visibility)
+    let resetClickCount = 0;
+    let resetTimeout = null;
     const resetBtn = createButton('🔄 リセット', () => {
-        if (confirm('本当にリセット？\n全てのデータが失われます！')) {
-            if (confirm('本当の本当にリセット？\n最初からやり直しになります！')) {
-                localStorage.removeItem(CONFIG.GAME.STORAGE_KEY);
-                alert('データをリセットしました');
-                location.reload();
-            }
+        resetClickCount++;
+
+        if (resetClickCount === 1) {
+            // First click - show warning
+            resetBtn.textContent = '⚠️ 本当にリセット？もう一度押してください';
+            resetBtn.style.backgroundColor = '#ff6600';
+
+            // Reset after 5 seconds if not clicked again
+            resetTimeout = setTimeout(() => {
+                resetClickCount = 0;
+                resetBtn.textContent = '🔄 リセット';
+                resetBtn.style.backgroundColor = '';
+            }, 5000);
+        } else if (resetClickCount === 2) {
+            // Second click - final confirmation
+            clearTimeout(resetTimeout);
+            resetBtn.textContent = '🚨 最終確認！もう一度押すと削除されます';
+            resetBtn.style.backgroundColor = '#cc0000';
+
+            resetTimeout = setTimeout(() => {
+                resetClickCount = 0;
+                resetBtn.textContent = '🔄 リセット';
+                resetBtn.style.backgroundColor = '';
+            }, 5000);
+        } else if (resetClickCount >= 3) {
+            // Third click - execute reset
+            clearTimeout(resetTimeout);
+            localStorage.removeItem(CONFIG.GAME.STORAGE_KEY);
+            location.reload();
         }
     }, 'btn btn-danger');
     actionDiv.appendChild(resetBtn);
@@ -185,14 +210,41 @@ function renderMainScreen(container) {
     // Save/Load buttons
     const saveLoadDiv = createElement('div', 'save-load-buttons');
 
+    let saveClickCount = 0;
+    let saveTimeout = null;
     const saveBtn = createButton('手動セーブ', () => {
-        if (confirm('現在の進行状況を上書き保存しますか？\n（前の状態には戻せません）')) {
+        saveClickCount++;
+
+        if (saveClickCount === 1) {
+            // First click - show confirmation
+            saveBtn.textContent = '💾 上書き保存します。もう一度押してください';
+            saveBtn.style.backgroundColor = '#ff9900';
+
+            // Reset after 3 seconds
+            saveTimeout = setTimeout(() => {
+                saveClickCount = 0;
+                saveBtn.textContent = '手動セーブ';
+                saveBtn.style.backgroundColor = '';
+            }, 3000);
+        } else if (saveClickCount >= 2) {
+            // Second click - execute save
+            clearTimeout(saveTimeout);
             const success = saveGame();
+
             if (success) {
-                alert('セーブしました');
+                saveBtn.textContent = '✅ セーブしました';
+                saveBtn.style.backgroundColor = '#00cc66';
             } else {
-                alert('セーブに失敗しました');
+                saveBtn.textContent = '❌ セーブに失敗しました';
+                saveBtn.style.backgroundColor = '#cc0000';
             }
+
+            // Reset after 2 seconds
+            setTimeout(() => {
+                saveClickCount = 0;
+                saveBtn.textContent = '手動セーブ';
+                saveBtn.style.backgroundColor = '';
+            }, 2000);
         }
     }, 'btn btn-secondary');
     saveLoadDiv.appendChild(saveBtn);
@@ -236,24 +288,54 @@ function renderTrainingScreen(container) {
         const optionsDiv = createElement('div', 'boycott-options');
 
         // Option 1: 仕方ないので今日は練習休み
+        let restClickCount = 0;
+        let restTimeout = null;
         const restOptionBtn = createButton('仕方ないので今日は練習休み', () => {
-            if (confirm('全ステータス-0.3で次の日へ進みます。よろしいですか？')) {
+            restClickCount++;
+
+            if (restClickCount === 1) {
+                restOptionBtn.textContent = '⚠️ 全ステータス-0.3になります。もう一度押してください';
+                restOptionBtn.style.backgroundColor = '#ff6600';
+
+                restTimeout = setTimeout(() => {
+                    restClickCount = 0;
+                    restOptionBtn.textContent = '仕方ないので今日は練習休み';
+                    restOptionBtn.style.backgroundColor = '';
+                }, 3000);
+            } else if (restClickCount >= 2) {
+                clearTimeout(restTimeout);
                 applyBoycottRestPenalty();
                 advanceDay();
                 saveGame();
-                alert('全ステータスが0.3下がりました...');
                 switchScreen(SCREENS.MAIN);
             }
         }, 'btn btn-warning');
 
         // Option 2: キャプテンと話し合い
+        let talkClickCount = 0;
+        let talkTimeout = null;
         const talkOptionBtn = createButton('キャプテンと話し合い', () => {
-            if (confirm('キャプテンの性格がパワハラ以外にランダムで変更されます。よろしいですか？')) {
+            talkClickCount++;
+
+            if (talkClickCount === 1) {
+                talkOptionBtn.textContent = '💬 性格がランダム変更されます。もう一度押してください';
+                talkOptionBtn.style.backgroundColor = '#0066cc';
+
+                talkTimeout = setTimeout(() => {
+                    talkClickCount = 0;
+                    talkOptionBtn.textContent = 'キャプテンと話し合い';
+                    talkOptionBtn.style.backgroundColor = '';
+                }, 3000);
+            } else if (talkClickCount >= 2) {
+                clearTimeout(talkTimeout);
                 const newPersonality = changeCaptainPersonality();
                 advanceDay();
                 saveGame();
-                alert(`キャプテンの性格が「${newPersonality}」に変わりました！\n翌日から新しい気持ちで練習が始まります。`);
-                switchScreen(SCREENS.MAIN);
+                talkOptionBtn.textContent = `✅ 性格が「${newPersonality}」に変わりました！`;
+                talkOptionBtn.style.backgroundColor = '#00cc66';
+                setTimeout(() => {
+                    switchScreen(SCREENS.MAIN);
+                }, 2000);
             }
         }, 'btn btn-primary');
 
@@ -331,11 +413,23 @@ function renderTrainingScreen(container) {
 
         // Add "fill all days until match" button if Round 3 cleared
         if (gameState.tournament.currentRound >= 4 && gameState.currentDay >= 1 && gameState.currentDay <= 5) {
+            let fillClickCount = 0;
+            let fillTimeout = null;
             const fillAllBtn = createButton('次の試合までは全てこの練習', () => {
-                const daysUntilMatch = 6 - gameState.currentDay; // Days from current to Saturday
-                const confirmMsg = `残り${daysUntilMatch}日間、全て${menu.name}を行います。よろしいですか？`;
+                const daysUntilMatch = 6 - gameState.currentDay;
+                fillClickCount++;
 
-                if (confirm(confirmMsg)) {
+                if (fillClickCount === 1) {
+                    fillAllBtn.textContent = `📅 残り${daysUntilMatch}日間「${menu.name}」を実行。もう一度押してください`;
+                    fillAllBtn.style.backgroundColor = '#ff9900';
+
+                    fillTimeout = setTimeout(() => {
+                        fillClickCount = 0;
+                        fillAllBtn.textContent = '次の試合までは全てこの練習';
+                        fillAllBtn.style.backgroundColor = '';
+                    }, 4000);
+                } else if (fillClickCount >= 2) {
+                    clearTimeout(fillTimeout);
                     let successCount = 0;
                     for (let i = 0; i < daysUntilMatch; i++) {
                         const result = executeTraining(menu.name);
@@ -343,15 +437,24 @@ function renderTrainingScreen(container) {
                             successCount++;
                             advanceDay();
                         } else {
-                            alert(`${i + 1}日目で失敗しました: ${result.message}`);
-                            break;
+                            fillAllBtn.textContent = `❌ ${i + 1}日目で失敗: ${result.message}`;
+                            fillAllBtn.style.backgroundColor = '#cc0000';
+                            setTimeout(() => {
+                                fillClickCount = 0;
+                                fillAllBtn.textContent = '次の試合までは全てこの練習';
+                                fillAllBtn.style.backgroundColor = '';
+                            }, 3000);
+                            return;
                         }
                     }
 
                     if (successCount > 0) {
-                        alert(`${successCount}日間の${menu.name}を完了しました！`);
+                        fillAllBtn.textContent = `✅ ${successCount}日間の${menu.name}を完了！`;
+                        fillAllBtn.style.backgroundColor = '#00cc66';
                         saveGame();
-                        switchScreen(SCREENS.MAIN);
+                        setTimeout(() => {
+                            switchScreen(SCREENS.MAIN);
+                        }, 2000);
                     }
                 }
             }, 'btn btn-secondary btn-fill-all');
@@ -1086,29 +1189,63 @@ function renderMatchSetupScreen(container, data) {
             }
 
             // Make tactic clickable for editing
-            item.addEventListener('click', () => {
-                // Show custom dialog with "変更" and "削除" options
-                const action = prompt(`作戦${i + 1}の操作を選択してください:\n1: 変更\n2: 削除\n\n数字を入力してください (1 または 2)`);
+            let deleteClickCount = 0;
+            let deleteTimeout = null;
 
-                if (action === '1') {
-                    // Edit mode - replace the tactic
-                    editTactic(i, listElement);
-                } else if (action === '2') {
-                    // Delete
-                    if (confirm(`作戦${i + 1}を削除しますか？`)) {
-                        currentTactics.splice(i, 1);
+            // Create action buttons container
+            const actionBtnsDiv = createElement('div', 'tactic-action-buttons');
+            actionBtnsDiv.style.display = 'none';
+            actionBtnsDiv.style.marginTop = '5px';
 
-                        // Reset failed tactic index if we deleted the failed tactic or earlier
-                        if (gameState.currentMatch && gameState.currentMatch.failedTacticIndex !== null) {
-                            if (i <= gameState.currentMatch.failedTacticIndex) {
-                                gameState.currentMatch.failedTacticIndex = null;
-                            }
+            const editBtn = createButton('✏️ 変更', () => {
+                editTactic(i, listElement);
+            }, 'btn btn-primary btn-small');
+
+            const deleteBtn = createButton('🗑️ 削除', () => {
+                deleteClickCount++;
+
+                if (deleteClickCount === 1) {
+                    deleteBtn.textContent = '⚠️ もう一度押すと削除';
+                    deleteBtn.style.backgroundColor = '#ff0000';
+
+                    deleteTimeout = setTimeout(() => {
+                        deleteClickCount = 0;
+                        deleteBtn.textContent = '🗑️ 削除';
+                        deleteBtn.style.backgroundColor = '';
+                    }, 3000);
+                } else if (deleteClickCount >= 2) {
+                    clearTimeout(deleteTimeout);
+                    currentTactics.splice(i, 1);
+
+                    // Reset failed tactic index if we deleted the failed tactic or earlier
+                    if (gameState.currentMatch && gameState.currentMatch.failedTacticIndex !== null) {
+                        if (i <= gameState.currentMatch.failedTacticIndex) {
+                            gameState.currentMatch.failedTacticIndex = null;
                         }
+                    }
 
-                        updateTacticList(listElement);
+                    updateTacticList(listElement);
+                }
+            }, 'btn btn-danger btn-small');
+
+            actionBtnsDiv.appendChild(editBtn);
+            actionBtnsDiv.appendChild(deleteBtn);
+
+            item.addEventListener('click', (e) => {
+                // Toggle action buttons
+                if (e.target === item || e.target.classList.contains('tactic-text')) {
+                    if (actionBtnsDiv.style.display === 'none') {
+                        actionBtnsDiv.style.display = 'block';
+                    } else {
+                        actionBtnsDiv.style.display = 'none';
+                        deleteClickCount = 0;
+                        deleteBtn.textContent = '🗑️ 削除';
+                        deleteBtn.style.backgroundColor = '';
                     }
                 }
             });
+
+            item.appendChild(actionBtnsDiv);
 
             listElement.appendChild(item);
         });
