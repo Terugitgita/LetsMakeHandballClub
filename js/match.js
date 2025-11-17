@@ -42,7 +42,17 @@ class Player {
 
     getSpeed() {
         const stats = this.team === 'player' ? getEffectiveStats() : gameState.currentMatch.opponent.stats;
-        const baseSpeed = CONFIG.MOVEMENT.BASE_SPEED + (stats.dribble * CONFIG.MOVEMENT.STAT_MODIFIER);
+        let baseSpeed = CONFIG.MOVEMENT.BASE_SPEED + (stats.dribble * CONFIG.MOVEMENT.STAT_MODIFIER);
+
+        // Apply defensive speed boost (1.3x for opponent team)
+        if (this.team === 'opponent') {
+            baseSpeed *= 1.3;
+        }
+
+        // GK gets extra speed boost for lateral movement (1.5x additional)
+        if (this.positionKey === 'GK') {
+            baseSpeed *= 1.5;
+        }
 
         if (this.isGearSecond) {
             return baseSpeed * CONFIG.ACE.GEAR_SECOND_MULTIPLIER;
@@ -856,19 +866,32 @@ export class MatchSimulator {
                 });
         }
 
-        // GK movement - moves only in x direction to follow ball
+        // GK movement - follows ball position and reacts to shots
         const gk = this.opponents['GK'];
         if (gk) {
             const basePos = CONFIG.OPPONENT_POSITIONS['GK'];
 
-            // GK follows ball holder's x position
             // Goal frame is 42.5% to 57.5%
             const goalLeft = 42.5;
             const goalRight = 57.5;
             const goalCenter = 50;
 
-            // Target x position is ball holder's x, clamped to goal frame
-            let targetX = ballHolderPlayer.x;
+            let targetX;
+
+            // If ball is animating (pass or shot), follow ball position
+            if (this.ballAnimating) {
+                // Follow the ball's actual position during animation
+                targetX = this.ballX;
+
+                // If ball is moving toward goal (y decreasing toward 0), react faster
+                if (this.ballY < 30 && this.ballTargetY < this.ballY) {
+                    // Ball is approaching goal - GK moves more aggressively to ball's x position
+                    targetX = this.ballX;
+                }
+            } else {
+                // When ball is not animating, follow ball holder's position
+                targetX = ballHolderPlayer.x;
+            }
 
             // Clamp to goal area with some margin
             targetX = Math.max(goalLeft + 1, Math.min(goalRight - 1, targetX));
