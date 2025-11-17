@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 20000 20000"
+     width="800" height="800"
+     style="background:#ffffff">
+
+  <defs>
+    <style>
+      .solid { stroke:#000; stroke-width:50; fill:none; }
+      .goal  { stroke:#000; stroke-width:80; fill:none; }
+      .dash  { stroke:#000; stroke-width:50; stroke-dasharray:200 200; fill:none; }
+
+      .atk   { fill:#c62828; stroke:#000; stroke-width:20; }
+      .def   { fill:#27ae60; stroke:#003300; stroke-width:20; }
+      .label { font-family:"MS Gothic"; font-size:420px; fill:#000; }
+    </style>
+  </defs>
+
+  <!-- コート半面（20m x 20m） -->
+  <rect x="0" y="0" width="20000" height="20000" class="solid"/>
+  <!-- ゴール -->
+  <line x1="8500" y1="0" x2="11500" y2="0" class="goal"/>
+  <!-- 6mライン -->
+  <line x1="8500" y1="6000" x2="11500" y2="6000" class="solid"/>
+  <path d="M 8500 6000 A 6000 6000 0 0 1 2500 0" class="solid"/>
+  <path d="M 17500 0 A 6000 6000 0 0 1 11500 6000" class="solid"/>
+  <!-- 7mライン -->
+  <line x1="9500" y1="7000" x2="10500" y2="7000" class="solid"/>
+  <!-- GK4m制限マーク -->
+  <line x1="9925" y1="4000" x2="10075" y2="4000" class="solid"/>
+  <!-- 9mライン -->
+  <path d="M 8500 9000 A 9000 9000 0 0 1 0 2958" class="dash"/>
+  <path d="M 20000 2958 A 9000 9000 0 0 1 11500 9000" class="dash"/>
+  <!-- センターライン -->
+  <line x1="0" y1="20000" x2="20000" y2="20000" class="solid"/>
+
+  <!-- 攻撃側（赤） -->
+  <circle class="atk" cx="750" cy="2000" r="300"/>
+  <text x="950" y="2500" class="label">左翼</text>
+
+  <circle class="atk" cx="1750" cy="10000" r="300"/>
+  <text x="1550" y="10500" class="label">左バック</text>
+
+  <circle class="atk" cx="9900" cy="14000" r="320"/>
+  <text x="9700" y="14500" class="label">中央バック</text>
+
+  <circle class="atk" cx="18250" cy="10000" r="300"/>
+  <text x="18050" y="10500" class="label">右バック</text>
+
+  <circle class="atk" cx="19250" cy="2000" r="300"/>
+  <text x="19050" y="2500" class="label">右翼</text>
+
+  <circle class="atk" cx="12500" cy="6500" r="320"/>
+  <text x="12300" y="7000" class="label">ポスト</text>
+
+  <!-- 守備側（緑） -->
+  <circle class="def" cx="2600" cy="3000" r="260"/>
+  <text x="2400" y="3500" class="label">左ウイング</text>
+
+  <circle class="def" cx="5000" cy="6250" r="260"/>
+  <text x="4800" y="6750" class="label">左ハーフ</text>
+
+  <circle class="def" cx="9800" cy="10000" r="300"/>
+  <text x="9600" y="10500" class="label">センター</text>
+
+  <circle class="def" cx="10500" cy="6500" r="260"/>
+  <text x="10300" y="7000" class="label">ポスト対応</text>
+
+  <circle class="def" cx="14000" cy="6000" r="260"/>
+  <text x="13800" y="6500" class="label">右ハーフ</text>
+
+  <circle class="def" cx="17400" cy="3000" r="260"/>
+  <text x="17200" y="3500" class="label">右ウイング</text>
+
+</svg>
