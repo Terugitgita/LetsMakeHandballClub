@@ -7,6 +7,38 @@ import { getAvailableMenus, previewTrainingGrowth, executeTraining, getCaptainIn
 import { MatchSimulator, createTactic, validateTactics } from './match.js';
 import { createElement, createButton, deepClone } from './utils.js';
 
+// Senryu data (loaded from Random_Senryu.txt)
+let senryuData = null;
+
+// Load senryu data
+async function loadSenryuData() {
+    if (senryuData) return senryuData;
+
+    try {
+        const response = await fetch('Random_Senryu.txt');
+        const data = await response.json();
+        senryuData = data;
+        return data;
+    } catch (error) {
+        console.error('Failed to load senryu data:', error);
+        // Return default data if loading fails
+        return {
+            kami: ["ずっきゅんと"],
+            naka: ["ずきゅずきゅずっきゅん"],
+            shimo: ["たまんない"]
+        };
+    }
+}
+
+// Generate random senryu
+function generateRandomSenryu(data) {
+    const randomKami = data.kami[Math.floor(Math.random() * data.kami.length)];
+    const randomNaka = data.naka[Math.floor(Math.random() * data.naka.length)];
+    const randomShimo = data.shimo[Math.floor(Math.random() * data.shimo.length)];
+
+    return `${randomKami}　${randomNaka}　${randomShimo}`;
+}
+
 // Screen types
 export const SCREENS = {
     TITLE: 'title',
@@ -1626,8 +1658,15 @@ function renderAceAwakeningScreen(container, data) {
         `${data.opponentName}に勝った。`);
     awakeningDiv.appendChild(victoryText);
 
-    // Awakening message
-    if (data.awakening) {
+    // Awakening message(s)
+    if (data.awakening && Array.isArray(data.awakening) && data.awakening.length > 0) {
+        data.awakening.forEach(awk => {
+            const awakeningText = createElement('p', 'awakening-message',
+                `その勝利をきっかけに、${awk.positionName}が${awk.type === 'gearSecond' ? 'ギアセカンド' : 'エース'}に覚醒！`);
+            awakeningDiv.appendChild(awakeningText);
+        });
+    } else if (data.awakening && !Array.isArray(data.awakening)) {
+        // Fallback for single awakening object (backwards compatibility)
         const awakeningText = createElement('p', 'awakening-message',
             `その勝利をきっかけに、${data.awakening.positionName}が${data.awakening.type === 'gearSecond' ? 'ギアセカンド' : 'エース'}に覚醒！`);
         awakeningDiv.appendChild(awakeningText);
@@ -1656,6 +1695,25 @@ function renderResultScreen(container, data) {
         <h3>${gameState.team.name} ${data.score.player} - ${data.score.opponent} ${data.opponent.name}</h3>
     `;
     resultDiv.appendChild(scoreDisplay);
+
+    // Display random senryu
+    const senryuContainer = createElement('div', 'senryu-container');
+    senryuContainer.innerHTML = '<p class="senryu-loading">今日の一句：読み込み中...</p>';
+    resultDiv.appendChild(senryuContainer);
+
+    // Load and display senryu asynchronously
+    loadSenryuData().then(data => {
+        const senryu = generateRandomSenryu(data);
+        senryuContainer.innerHTML = `
+            <div class="senryu-display">
+                <h4 class="senryu-title">今日の一句：</h4>
+                <p class="senryu-text">${senryu}</p>
+            </div>
+        `;
+    }).catch(error => {
+        console.error('Senryu display error:', error);
+        senryuContainer.innerHTML = '<p class="senryu-error">今日の一句：ずっきゅんと　ずきゅずきゅずっきゅん　たまんない</p>';
+    });
 
     if (data.won) {
         if (gameState.championshipWon) {

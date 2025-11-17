@@ -729,6 +729,40 @@ p {
     color: #333;
 }
 
+.senryu-container {
+    background: linear-gradient(135deg, #fff9e6 0%, #ffe6cc 100%);
+    padding: 20px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-bottom: 30px;
+    min-width: 300px;
+    border: 2px solid #cc9966;
+}
+
+.senryu-title {
+    font-size: 1.2rem;
+    color: #994400;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.senryu-text {
+    font-size: 1.1rem;
+    color: #333;
+    line-height: 1.8;
+    text-align: center;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+}
+
+.senryu-loading, .senryu-error {
+    font-size: 1rem;
+    color: #666;
+    text-align: center;
+    font-style: italic;
+}
+
 .championship-text {
     font-size: 2rem;
     color: #ff6600;

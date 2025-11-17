@@ -269,13 +269,29 @@ export function applyTraining(menuName) {
 
     // Calculate growth with captain modifiers
     let baseEffect = menu.effect;
+    let growth;
 
-    // For total training, use dynamic calculation
-    if (menuName === "総合練習") {
-        baseEffect = calculateTotalTrainingEffect();
+    // Special handling for Anpontan's total training
+    const personality = CONFIG.CAPTAIN.PERSONALITY[gameState.captain.personality];
+    if (menuName === "総合練習" && personality.specialTraining && gameState.captain.personality === "アンポンタン") {
+        const currentDay = getCurrentDayInfo().day;
+
+        if (currentDay === "金") {
+            // Friday: 7.0 each stat
+            growth = { pass: 7.0, dribble: 7.0, shoot: 7.0 };
+        } else {
+            // Mon-Thu: 0.0 each stat
+            growth = { pass: 0.0, dribble: 0.0, shoot: 0.0 };
+        }
+    } else {
+        // Normal training calculation
+        // For total training, use dynamic calculation
+        if (menuName === "総合練習") {
+            baseEffect = calculateTotalTrainingEffect();
+        }
+
+        growth = calculateTrainingGrowth(baseEffect);
     }
-
-    const growth = calculateTrainingGrowth(baseEffect);
 
     // Record this training for weekly tracking (before total training)
     if (menuName !== "総合練習") {
@@ -327,9 +343,20 @@ function calculateTrainingGrowth(baseEffect) {
     return growth;
 }
 
-// Get personality modifier (check for boycott)
+// Get personality modifier (check for boycott and special training)
 function getPersonalityModifier() {
     const personality = CONFIG.CAPTAIN.PERSONALITY[gameState.captain.personality];
+
+    // Check for Anpontan special training
+    if (personality.specialTraining && gameState.captain.personality === "アンポンタン") {
+        const currentDay = getCurrentDayInfo().day;
+
+        if (currentDay === "金") {
+            return 21; // Friday: 21x effect
+        } else {
+            return 0.1; // Mon-Thu: 0.1x effect
+        }
+    }
 
     // Check boycott condition
     if (personality.boycottWeek && gameState.currentWeek >= personality.boycottWeek) {
@@ -465,11 +492,19 @@ export function recordMatchResult(won, playerScore, opponentScore) {
 
     gameState.tournament.results.push(result);
 
-    let awakeningInfo = null;
+    let awakeningInfo = [];
 
     // Add ace if won
     if (won) {
-        awakeningInfo = addAce();
+        // Add multiple aces based on config
+        const acesToAdd = CONFIG.ACE.INCREMENT_PER_ROUND;
+        for (let i = 0; i < acesToAdd; i++) {
+            const awakening = addAce();
+            if (awakening) {
+                awakeningInfo.push(awakening);
+            }
+        }
+
         gameState.tournament.currentRound++;
 
         // Check if championship won
