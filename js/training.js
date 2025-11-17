@@ -40,6 +40,28 @@ export function previewTrainingGrowth(menuName) {
 
     // Handle total training (dynamically calculated)
     if (menuName === "総合練習") {
+        // Check for アンポンタン special case
+        const personality = CONFIG.CAPTAIN.PERSONALITY[gameState.captain.personality];
+        if (personality.specialTraining && gameState.captain.personality === "アンポンタン") {
+            const currentDay = getCurrentDayInfo().day;
+
+            if (currentDay === "金") {
+                // 金曜：7.0ずつ
+                return {
+                    pass: '+7.0',
+                    dribble: '+7.0',
+                    shoot: '+7.0'
+                };
+            } else {
+                // 月〜木：0.0
+                return {
+                    pass: '+0.0',
+                    dribble: '+0.0',
+                    shoot: '+0.0'
+                };
+            }
+        }
+
         // Find the highest single training value across all weekly training
         let maxValue = 0;
 
@@ -124,6 +146,19 @@ export function previewTrainingGrowth(menuName) {
     // Check boycott
     if (personality.boycottWeek && gameState.currentWeek >= personality.boycottWeek) {
         personalityMod = personality.boycottEffect;
+    }
+
+    // アンポンタン special training effect
+    if (personality.specialTraining && gameState.captain.personality === "アンポンタン") {
+        const currentDay = getCurrentDayInfo().day;
+
+        if (currentDay === "金") {
+            // 金曜：21倍効果
+            personalityMod = 21;
+        } else {
+            // 月〜木：0.1倍効果
+            personalityMod = 0.1;
+        }
     }
 
     growth.pass *= personalityMod;

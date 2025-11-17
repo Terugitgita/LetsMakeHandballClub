@@ -27,7 +27,8 @@ export const gameState = {
     // Captain system
     captain: {
         personality: "熱血",
-        policy: "論理的"
+        policy: "論理的",
+        name: null  // For special captains like "すぅぅぅぅてぇ"
     },
 
     // Tournament data
@@ -48,13 +49,24 @@ export const gameState = {
 
 // Initialize new game with random captain and stats
 export function initializeNewGame() {
-    // Random captain personality
-    const personalities = Object.keys(CONFIG.CAPTAIN.PERSONALITY);
-    gameState.captain.personality = randomChoice(personalities);
+    // 2% chance for special captain "すぅぅぅぅてぇ"
+    const isSuteee = Math.random() < 0.02;
 
-    // Random captain policy
-    const policies = Object.keys(CONFIG.CAPTAIN.POLICY);
-    gameState.captain.policy = randomChoice(policies);
+    if (isSuteee) {
+        // キャプテンすぅぅぅぅてぇ
+        gameState.captain.personality = "アンポンタン";
+        gameState.captain.policy = "トンチンカン";
+        gameState.captain.name = "すぅぅぅぅてぇ";
+    } else {
+        // Random captain personality (excluding アンポンタン)
+        const personalities = Object.keys(CONFIG.CAPTAIN.PERSONALITY).filter(p => p !== "アンポンタン");
+        gameState.captain.personality = randomChoice(personalities);
+
+        // Random captain policy (excluding トンチンカン)
+        const policies = Object.keys(CONFIG.CAPTAIN.POLICY).filter(p => p !== "トンチンカン");
+        gameState.captain.policy = randomChoice(policies);
+        gameState.captain.name = null;
+    }
 
     // Random initial stats
     gameState.team.stats.pass = randomFloat(CONFIG.INITIAL.MIN, CONFIG.INITIAL.MAX, 1);
@@ -484,6 +496,27 @@ export function recordMatchResult(won, playerScore, opponentScore) {
 // Get game state snapshot (for debugging)
 export function getStateSnapshot() {
     return deepClone(gameState);
+}
+
+// Change captain personality (for boycott resolution)
+export function changeCaptainPersonality() {
+    // Get all personalities except パワハラ and アンポンタン
+    const availablePersonalities = Object.keys(CONFIG.CAPTAIN.PERSONALITY)
+        .filter(p => p !== "パワハラ" && p !== "アンポンタン");
+
+    // Random select new personality
+    gameState.captain.personality = randomChoice(availablePersonalities);
+    gameState.captain.name = null; // Clear special name
+
+    return gameState.captain.personality;
+}
+
+// Apply boycott rest penalty (-0.3 to all stats, minimum 1.0)
+export function applyBoycottRestPenalty() {
+    const penalty = 0.3;
+    gameState.team.stats.pass = Math.max(1.0, gameState.team.stats.pass - penalty);
+    gameState.team.stats.dribble = Math.max(1.0, gameState.team.stats.dribble - penalty);
+    gameState.team.stats.shoot = Math.max(1.0, gameState.team.stats.shoot - penalty);
 }
 
 // Export for debugging in browser console

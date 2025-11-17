@@ -57,7 +57,7 @@ export const INITIAL_STATS = {
 
 export const ACE_SYSTEM = {
     INITIAL_COUNT: 0,
-    INCREMENT_PER_ROUND: 1,
+    INCREMENT_PER_ROUND: 2,  // 1試合ごとに2人覚醒
     STAT_MULTIPLIER: 1.5,
     SIZE_MULTIPLIER: 1.5,
     RANDOM_POSITION: true,
@@ -83,6 +83,13 @@ export const CAPTAIN_PERSONALITY = {
         boycottWeek: null,
         boycottEffect: null,
         description: "バランスの取れた指導"
+    },
+    "アンポンタン": {
+        growthMultiplier: 1.0,
+        boycottWeek: null,
+        boycottEffect: null,
+        specialTraining: true,  // 特殊な練習効果
+        description: "キャプテンすぅぅぅぅてぇ - 月〜木は効果0.1、金曜は21倍！"
     }
 };
 
@@ -107,6 +114,11 @@ export const CAPTAIN_POLICY = {
         focusLowest: true,
         multiplier: 1.5,
         description: "弱点を重点的に強化"
+    },
+    "トンチンカン": {
+        statModifier: { pass: 1.0, dribble: 1.0, shoot: 1.0 },
+        focusLowest: false,
+        description: "キャプテンすぅぅぅぅてぇの方針"
     }
 };
 

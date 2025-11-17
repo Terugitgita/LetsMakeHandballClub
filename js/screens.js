@@ -1,7 +1,7 @@
 // screens.js - UI Screen Management
 
 import { CONFIG } from './config.js';
-import { gameState, initializeNewGame, saveGame, loadGame, hasSaveData, advanceDay, recordMatchResult, setCurrentMatch, clearCurrentMatch } from './gameState.js';
+import { gameState, initializeNewGame, saveGame, loadGame, hasSaveData, advanceDay, recordMatchResult, setCurrentMatch, clearCurrentMatch, isBoycottActive, changeCaptainPersonality, applyBoycottRestPenalty } from './gameState.js';
 import { initializeTournament, getNextOpponent, getCurrentRoundName, getSimplifiedBracket, processRoundResults, advanceTournament } from './tournament.js';
 import { getAvailableMenus, previewTrainingGrowth, executeTraining, getCaptainInfo } from './training.js';
 import { MatchSimulator, createTactic, validateTactics } from './match.js';
@@ -131,7 +131,9 @@ function renderMainScreen(container) {
 
     // Captain info (simplified display)
     const captainDiv = createElement('div', 'captain-info');
+    const captainName = gameState.captain.name ? `キャプテン：${gameState.captain.name}<br>` : '';
     captainDiv.innerHTML = `
+        ${captainName}
         <p>性格：${gameState.captain.personality}　方針：${gameState.captain.policy}</p>
     `;
 
@@ -207,6 +209,67 @@ function renderMainScreen(container) {
 // Training Screen
 function renderTrainingScreen(container) {
     const trainingDiv = createElement('div', 'training-screen');
+
+    // Check for boycott
+    const isBoycott = isBoycottActive();
+
+    if (isBoycott) {
+        // Boycott screen
+        const boycottHeader = createElement('h2', 'boycott-header', 'パワハラは嫌だ！練習ボイコット！');
+        boycottHeader.style.color = '#ff0000';
+        trainingDiv.appendChild(boycottHeader);
+
+        const boycottMessage = createElement('p', 'boycott-message', '選手たちが練習をボイコットしています...');
+        trainingDiv.appendChild(boycottMessage);
+
+        // Current stats
+        const statsDiv = createElement('div', 'current-stats');
+        statsDiv.innerHTML = `
+            <h3>現在の能力値</h3>
+            <p>パス: ${gameState.team.stats.pass.toFixed(1)}</p>
+            <p>ドリブル: ${gameState.team.stats.dribble.toFixed(1)}</p>
+            <p>シュート: ${gameState.team.stats.shoot.toFixed(1)}</p>
+        `;
+        trainingDiv.appendChild(statsDiv);
+
+        // Boycott options
+        const optionsDiv = createElement('div', 'boycott-options');
+
+        // Option 1: 仕方ないので今日は練習休み
+        const restOptionBtn = createButton('仕方ないので今日は練習休み', () => {
+            if (confirm('全ステータス-0.3で次の日へ進みます。よろしいですか？')) {
+                applyBoycottRestPenalty();
+                advanceDay();
+                saveGame();
+                alert('全ステータスが0.3下がりました...');
+                switchScreen(SCREENS.MAIN);
+            }
+        }, 'btn btn-warning');
+
+        // Option 2: キャプテンと話し合い
+        const talkOptionBtn = createButton('キャプテンと話し合い', () => {
+            if (confirm('キャプテンの性格がパワハラ以外にランダムで変更されます。よろしいですか？')) {
+                const newPersonality = changeCaptainPersonality();
+                advanceDay();
+                saveGame();
+                alert(`キャプテンの性格が「${newPersonality}」に変わりました！\n翌日から新しい気持ちで練習が始まります。`);
+                switchScreen(SCREENS.MAIN);
+            }
+        }, 'btn btn-primary');
+
+        optionsDiv.appendChild(restOptionBtn);
+        optionsDiv.appendChild(talkOptionBtn);
+        trainingDiv.appendChild(optionsDiv);
+
+        // Back button
+        const backBtn = createButton('戻る', () => {
+            switchScreen(SCREENS.MAIN);
+        }, 'btn btn-secondary');
+        trainingDiv.appendChild(backBtn);
+
+        container.appendChild(trainingDiv);
+        return;
+    }
 
     const header = createElement('h2', 'training-header', CONFIG.MESSAGES.TRAINING.selectMenu);
     trainingDiv.appendChild(header);
