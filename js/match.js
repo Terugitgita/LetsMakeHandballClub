@@ -2,6 +2,7 @@
 
 import { CONFIG } from './config.js';
 import { gameState, getEffectiveStats } from './gameState.js';
+import { assetManager } from './assets.js';
 import {
     distance,
     pointToLineDistance,
@@ -183,7 +184,12 @@ export class MatchSimulator {
         this.pendingTakeover = false;
         this.failedTacticIndex = null;
 
+        // Action icon display
+        this.actionIconElement = null;
+        this.currentAction = null;
+
         this.initializePlayers();
+        this.initializeActionIcon();
 
         // Initialize ball position at CB
         const cbPlayer = this.players['CB'];
@@ -218,6 +224,33 @@ export class MatchSimulator {
 
         // Ball starts with CB
         this.ballHolder = 'CB';
+    }
+
+    initializeActionIcon() {
+        // Create action icon element
+        this.actionIconElement = document.createElement('img');
+        this.actionIconElement.className = 'match-action-icon';
+        this.actionIconElement.style.display = 'none';
+        document.body.appendChild(this.actionIconElement);
+    }
+
+    showActionIcon(action) {
+        if (!this.actionIconElement) return;
+
+        this.currentAction = action;
+        const actionImg = assetManager.getActionImage(action);
+
+        if (actionImg) {
+            this.actionIconElement.src = actionImg.src;
+            this.actionIconElement.style.display = 'block';
+        }
+    }
+
+    hideActionIcon() {
+        if (this.actionIconElement) {
+            this.actionIconElement.style.display = 'none';
+        }
+        this.currentAction = null;
     }
 
     setTactics(tactics) {
@@ -289,6 +322,7 @@ export class MatchSimulator {
                 this.ballX = this.ballTargetX;
                 this.ballY = this.ballTargetY;
                 this.ballAnimating = false;
+                this.hideActionIcon();
             } else {
                 // Move ball toward target
                 const moveSpeed = this.ballSpeed * dt;
@@ -296,6 +330,7 @@ export class MatchSimulator {
                     this.ballX = this.ballTargetX;
                     this.ballY = this.ballTargetY;
                     this.ballAnimating = false;
+                    this.hideActionIcon();
                 } else {
                     this.ballX += (dx / dist) * moveSpeed;
                     this.ballY += (dy / dist) * moveSpeed;
@@ -465,12 +500,14 @@ export class MatchSimulator {
     }
 
     executeDribbleBack() {
+        this.showActionIcon('dribble');
         const player = this.players[this.ballHolder];
         const backDistance = 30; // Medium distance
         player.setTarget(player.x, Math.max(5, player.y - backDistance));
     }
 
     executePass(toPosition) {
+        this.showActionIcon('pass');
         console.log('executePass called:', { ballHolder: this.ballHolder, toPosition });
         const fromPlayer = this.players[this.ballHolder];
         const toPlayer = this.players[toPosition];
@@ -565,6 +602,7 @@ export class MatchSimulator {
     }
 
     executeShoot(shootType) {
+        this.showActionIcon('shoot');
         const shooter = this.players[this.ballHolder];
 
         // Calculate target based on accurate goal dimensions from COART.svg
@@ -975,6 +1013,12 @@ export class MatchSimulator {
         this.players = {};
         this.opponents = {};
         this.tactics = [];
+
+        // Clean up action icon
+        if (this.actionIconElement) {
+            this.actionIconElement.remove();
+            this.actionIconElement = null;
+        }
     }
 }
 

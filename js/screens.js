@@ -6,6 +6,18 @@ import { initializeTournament, getNextOpponent, getCurrentRoundName, getSimplifi
 import { getAvailableMenus, previewTrainingGrowth, executeTraining, getCaptainInfo } from './training.js';
 import { MatchSimulator, createTactic, validateTactics } from './match.js';
 import { createElement, createButton, deepClone } from './utils.js';
+import { audioManager } from './audio.js';
+import { assetManager } from './assets.js';
+
+// 音声・画像を初回ロード開始（バックグラウンドで）
+let assetsLoadStarted = false;
+function startLoadingAssets() {
+    if (!assetsLoadStarted) {
+        assetsLoadStarted = true;
+        audioManager.loadSounds().catch(err => console.warn('Audio loading failed:', err));
+        assetManager.loadImages().catch(err => console.warn('Image loading failed:', err));
+    }
+}
 
 // Senryu data (loaded from Random_Senryu.txt)
 let senryuData = null;
@@ -62,6 +74,12 @@ export function switchScreen(screenName, data = {}) {
     container.innerHTML = '';
     container.className = `screen-${screenName}`;
 
+    // 設定ボタンを追加（全画面共通）
+    addSettingsButton(container);
+
+    // 初回のみアセットロード開始（バックグラウンド）
+    startLoadingAssets();
+
     switch (screenName) {
         case SCREENS.TITLE:
             renderTitleScreen(container);
@@ -88,11 +106,94 @@ export function switchScreen(screenName, data = {}) {
             renderTournamentScreen(container);
             break;
     }
+
+    // BGMを再生
+    playScreenBGM(screenName);
+}
+
+// 設定ボタンを画面左上に追加
+function addSettingsButton(container) {
+    const settingsBtn = createElement('button', 'settings-button');
+    settingsBtn.innerHTML = '⚙️';
+    settingsBtn.title = '設定';
+
+    settingsBtn.addEventListener('click', () => {
+        showSettingsModal();
+    });
+
+    container.appendChild(settingsBtn);
+}
+
+// 設定モーダルを表示
+function showSettingsModal() {
+    const modal = createElement('div', 'settings-modal');
+    const modalContent = createElement('div', 'settings-modal-content');
+
+    const title = createElement('h2', '', '設定');
+    modalContent.appendChild(title);
+
+    // 音量設定
+    const soundLabel = createElement('label', '', '音声: ');
+    const muteBtn = createButton(
+        audioManager.muted ? '🔇 OFF' : '🔊 ON',
+        () => {
+            const muted = audioManager.toggleMute();
+            muteBtn.textContent = muted ? '🔇 OFF' : '🔊 ON';
+        },
+        'btn btn-secondary'
+    );
+    soundLabel.appendChild(muteBtn);
+    modalContent.appendChild(soundLabel);
+
+    // 閉じるボタン
+    const closeBtn = createButton('閉じる', () => {
+        modal.remove();
+    }, 'btn btn-primary');
+    modalContent.appendChild(closeBtn);
+
+    modal.appendChild(modalContent);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+
+    document.body.appendChild(modal);
+}
+
+// 画面に応じたBGMを再生
+function playScreenBGM(screenName) {
+    switch (screenName) {
+        case SCREENS.TITLE:
+            // オープニングは音楽なし（静寂）
+            audioManager.stopBGM();
+            break;
+        case SCREENS.MAIN:
+        case SCREENS.TRAINING:
+        case SCREENS.TOURNAMENT:
+            audioManager.playBGM('practice');
+            break;
+        case SCREENS.MATCH:
+            audioManager.playBGM('match');
+            break;
+        case SCREENS.ACE_AWAKENING:
+            audioManager.playBGM('awakening', false);
+            break;
+        case SCREENS.RESULT:
+            // 結果画面のBGMは renderResultScreen 内で勝敗により切り替え
+            break;
+    }
 }
 
 // Title Screen
 function renderTitleScreen(container) {
     const titleDiv = createElement('div', 'title-screen');
+
+    // オープニング画像を背景として設定
+    const openingImg = assetManager.getImage('opening');
+    if (openingImg) {
+        titleDiv.style.backgroundImage = `url(${openingImg.src})`;
+        titleDiv.style.backgroundSize = 'cover';
+        titleDiv.style.backgroundPosition = 'center';
+    }
 
     const title = createElement('h1', 'game-title', CONFIG.MESSAGES.TITLE.gameTitle);
     const subtitle = createElement('p', 'game-subtitle', CONFIG.MESSAGES.TITLE.subtitle);
@@ -168,6 +269,20 @@ function renderMainScreen(container) {
         ${captainName}
         <p>性格：${gameState.captain.personality}　方針：${gameState.captain.policy}</p>
     `;
+
+    // すぅぅぅぅてぇの効果音を一度だけ再生
+    if (gameState.captain.name === 'すぅぅぅぅてぇ') {
+        audioManager.playSuteeOnce();
+    }
+
+    // キャプテン性格アイコンを表示
+    const captainImg = assetManager.getCaptainImage(gameState.captain.personality);
+    if (captainImg) {
+        const imgElement = createElement('img', 'captain-personality-icon');
+        imgElement.src = captainImg.src;
+        imgElement.alt = gameState.captain.personality;
+        captainDiv.appendChild(imgElement);
+    }
 
     // Action buttons
     const actionDiv = createElement('div', 'action-buttons');
@@ -430,6 +545,7 @@ function renderTrainingScreen(container) {
         }
 
         const selectBtn = createButton('この練習をする', () => {
+            audioManager.playSE('training_select');
             const result = executeTraining(menu.name);
             if (result.success) {
                 alert(result.message);
@@ -1683,6 +1799,21 @@ function renderAceAwakeningScreen(container, data) {
 
 function renderResultScreen(container, data) {
     const resultDiv = createElement('div', 'result-screen');
+
+    // 勝敗に応じたBGMを再生
+    if (data.won) {
+        audioManager.playBGM('victory', false);
+    } else {
+        audioManager.playBGM('lost');
+    }
+
+    // 勝敗に応じた画像を背景として設定
+    const resultImage = assetManager.getImage(data.won ? 'result_victory' : 'result_lost');
+    if (resultImage) {
+        resultDiv.style.backgroundImage = `url(${resultImage.src})`;
+        resultDiv.style.backgroundSize = 'cover';
+        resultDiv.style.backgroundPosition = 'center';
+    }
 
     const resultText = data.won ? CONFIG.MESSAGES.RESULT.win : CONFIG.MESSAGES.RESULT.lose;
     const resultClass = data.won ? 'result-win' : 'result-lose';
