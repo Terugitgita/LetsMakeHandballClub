@@ -1,0 +1,1221 @@
+{
+  "metadata": {
+    "version": "04",
+    "generatedAt": "2025-12-31T14:53:34.076Z",
+    "executionTime": 0.007,
+    "startTime": "2025-12-31T14:53:34.067Z",
+    "endTime": "2025-12-31T14:53:34.074Z",
+    "testMode": "Basic"
+  },
+  "summary": {
+    "total": 111,
+    "passed": 110,
+    "failed": 1,
+    "skipped": 0,
+    "passRate": "99.10"
+  },
+  "suites": [
+    {
+      "name": "Training System Tests (Basic)",
+      "category": "TR",
+      "stats": {
+        "total": 35,
+        "passed": 35,
+        "failed": 0,
+        "skipped": 0,
+        "pending": 0
+      },
+      "tests": [
+        {
+          "id": "TR-0001",
+          "description": "initializeNewGame() 正常動作",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.22350000000000136,
+          "timestamp": "2025-12-31T14:53:34.068Z"
+        },
+        {
+          "id": "TR-0002",
+          "description": "パス練習 × 熱血",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.24799999999999756,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0003",
+          "description": "ドリブル練習 × 熱血",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.015099999999996783,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0004",
+          "description": "シュート練習 × 熱血",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.019199999999997885,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0005",
+          "description": "総合練習 × 熱血",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.08560000000000656,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0006",
+          "description": "パス練習 × 甘やかし",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.012899999999994805,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0007",
+          "description": "ドリブル練習 × 甘やかし",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.013100000000001444,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0008",
+          "description": "シュート練習 × 甘やかし",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.011399999999994748,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0009",
+          "description": "総合練習 × 甘やかし",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.012999999999998124,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0010",
+          "description": "パス練習 × パワハラ",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.023399999999995202,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0011",
+          "description": "ドリブル練習 × パワハラ",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.014399999999994861,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0012",
+          "description": "シュート練習 × パワハラ",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.05670000000000641,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0013",
+          "description": "総合練習 × パワハラ",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0508000000000024,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0014",
+          "description": "方針効果: 論理的",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.06550000000000011,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0015",
+          "description": "方針効果: アグレッシブ",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.01180000000000092,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0016",
+          "description": "方針効果: 慎重",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.007799999999996032,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0017",
+          "description": "方針効果: 目立ちたがり",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0069000000000016826,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0018",
+          "description": "アンポンタン × 金曜日 特殊効果",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.030999999999998806,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0019",
+          "description": "アンポンタン × 月曜日 低効果",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.04490000000000549,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0020",
+          "description": "休養ボーナス",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.06349999999999767,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0021",
+          "description": "休養は金曜のみ",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.030000000000001137,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0022",
+          "description": "パワハラ ボイコット 3週目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.01920000000000499,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0023",
+          "description": "パワハラ ボイコットなし 1-2週目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.02459999999999951,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0024",
+          "description": "日進行: 1日目→2日目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.11309999999999576,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0025",
+          "description": "日進行: 2日目→3日目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.008399999999994634,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0026",
+          "description": "日進行: 3日目→4日目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.006200000000006867,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0027",
+          "description": "日進行: 4日目→5日目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.006199999999999761,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0028",
+          "description": "日進行: 5日目→6日目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.005599999999994054,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0029",
+          "description": "日進行: 6日目→7日目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.005400000000001626,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0030",
+          "description": "週進行: 7日目→次週1日目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.03520000000000323,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0031",
+          "description": "曜日情報: 1日目 = 月曜",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.020600000000001728,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0032",
+          "description": "曜日情報: 2日目 = 火曜",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0030000000000001137,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0033",
+          "description": "曜日情報: 3日目 = 水曜",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.00280000000000058,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0034",
+          "description": "曜日情報: 4日目 = 木曜",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0025999999999939405,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        },
+        {
+          "id": "TR-0035",
+          "description": "曜日情報: 5日目 = 金曜",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.002600000000001046,
+          "timestamp": "2025-12-31T14:53:34.069Z"
+        }
+      ]
+    },
+    {
+      "name": "Match Simulation Tests (Basic)",
+      "category": "MT",
+      "stats": {
+        "total": 35,
+        "passed": 35,
+        "failed": 0,
+        "skipped": 0,
+        "pending": 0
+      },
+      "tests": [
+        {
+          "id": "MT-0001",
+          "description": "ポジション定義: LW",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.06400000000000006,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0002",
+          "description": "ポジション定義: RW",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.00560000000000116,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0003",
+          "description": "ポジション定義: CB",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.002899999999996794,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0004",
+          "description": "ポジション定義: LB",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.002600000000001046,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0005",
+          "description": "ポジション定義: RB",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.002600000000001046,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0006",
+          "description": "ポジション定義: P",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.00269999999999726,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0007",
+          "description": "ポジション定義: GK",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.004899999999999238,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0008",
+          "description": "6mライン境界: LW",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.05279999999999774,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0009",
+          "description": "6mライン境界: RW",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0031999999999996476,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0010",
+          "description": "6mライン境界: CB",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0027000000000043656,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0011",
+          "description": "6mライン境界: LB",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.002600000000001046,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0012",
+          "description": "6mライン境界: RB",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0025999999999939405,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0013",
+          "description": "6mライン境界: P",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0024999999999977263,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0014",
+          "description": "GK位置: ゴールライン後方",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.017899999999997362,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0015",
+          "description": "距離計算: LW→P",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.043099999999995475,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0016",
+          "description": "距離計算: RW→P",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0033999999999991815,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0017",
+          "description": "距離計算: CB→P",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0027999999999934744,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0018",
+          "description": "距離計算: LB→P",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0025999999999939405,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0019",
+          "description": "距離計算: RB→P",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.00269999999999726,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0020",
+          "description": "成功率計算: 基本",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.03810000000000002,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0021",
+          "description": "成功率計算: 攻撃優位",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.013500000000000512,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0022",
+          "description": "成功率計算: 休養ボーナス",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.015500000000002956,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0023",
+          "description": "チームステータス生成: 1回戦",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.057699999999996976,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0024",
+          "description": "チームステータス生成: 3回戦",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0081999999999951,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0025",
+          "description": "チームステータス生成: 6回戦",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.009000000000000341,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0026",
+          "description": "チーム生成: 東京",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.08020000000000493,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0027",
+          "description": "地域戦術: 北海道",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.017800000000001148,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0028",
+          "description": "地域戦術: 東北",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0030000000000001137,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0029",
+          "description": "地域戦術: 関東",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.00280000000000058,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0030",
+          "description": "地域戦術: 中部",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.002400000000001512,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0031",
+          "description": "地域戦術: 近畿",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.002600000000001046,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0032",
+          "description": "地域戦術: 中国",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0024999999999977263,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0033",
+          "description": "地域戦術: 四国",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.00280000000000058,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0034",
+          "description": "地域戦術: 九州",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.002400000000001512,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        },
+        {
+          "id": "MT-0035",
+          "description": "地域戦術: K航拿",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0025000000000048317,
+          "timestamp": "2025-12-31T14:53:34.070Z"
+        }
+      ]
+    },
+    {
+      "name": "Tournament Tests (Basic)",
+      "category": "TN",
+      "stats": {
+        "total": 10,
+        "passed": 9,
+        "failed": 1,
+        "skipped": 0,
+        "pending": 0
+      },
+      "tests": [
+        {
+          "id": "TN-0001",
+          "description": "ブラケット作成: 48チーム",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.49220000000000397,
+          "timestamp": "2025-12-31T14:53:34.071Z"
+        },
+        {
+          "id": "TN-0002",
+          "description": "K航拿 シード位置",
+          "status": "[!]",
+          "error": "K航拿 should be seeded",
+          "expected": null,
+          "actual": null,
+          "duration": 0.33200000000000074,
+          "timestamp": "2025-12-31T14:53:34.071Z"
+        },
+        {
+          "id": "TN-0003",
+          "description": "奈良 非シード",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.13459999999999894,
+          "timestamp": "2025-12-31T14:53:34.072Z"
+        },
+        {
+          "id": "TN-0004",
+          "description": "ラウンド名: 1回戦",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.041399999999995885,
+          "timestamp": "2025-12-31T14:53:34.072Z"
+        },
+        {
+          "id": "TN-0005",
+          "description": "ラウンド名: 2回戦",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0037999999999982492,
+          "timestamp": "2025-12-31T14:53:34.072Z"
+        },
+        {
+          "id": "TN-0006",
+          "description": "ラウンド名: 3回戦",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.003500000000002501,
+          "timestamp": "2025-12-31T14:53:34.072Z"
+        },
+        {
+          "id": "TN-0007",
+          "description": "ラウンド名: 4回戦",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0033999999999991815,
+          "timestamp": "2025-12-31T14:53:34.072Z"
+        },
+        {
+          "id": "TN-0008",
+          "description": "ラウンド名: 5回戦",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.003500000000002501,
+          "timestamp": "2025-12-31T14:53:34.072Z"
+        },
+        {
+          "id": "TN-0009",
+          "description": "ラウンド名: 6回戦",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0030000000000001137,
+          "timestamp": "2025-12-31T14:53:34.072Z"
+        },
+        {
+          "id": "TN-0010",
+          "description": "トーナメント初期化",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.14069999999999538,
+          "timestamp": "2025-12-31T14:53:34.072Z"
+        }
+      ]
+    },
+    {
+      "name": "Ace System Tests (Basic)",
+      "category": "AC",
+      "stats": {
+        "total": 5,
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0,
+        "pending": 0
+      },
+      "tests": [
+        {
+          "id": "AC-0001",
+          "description": "エース覚醒: 正常動作",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.18949999999999534,
+          "timestamp": "2025-12-31T14:53:34.072Z"
+        },
+        {
+          "id": "AC-0002",
+          "description": "エース追加: チームに反映",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.036499999999996646,
+          "timestamp": "2025-12-31T14:53:34.072Z"
+        },
+        {
+          "id": "AC-0003",
+          "description": "エース: 全6ポジション埋める",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.04270000000000351,
+          "timestamp": "2025-12-31T14:53:34.072Z"
+        },
+        {
+          "id": "AC-0004",
+          "description": "ギアセカンド覚醒",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0373999999999981,
+          "timestamp": "2025-12-31T14:53:34.072Z"
+        },
+        {
+          "id": "AC-0005",
+          "description": "実効ステータス: 休養ボーナス",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.08520000000000039,
+          "timestamp": "2025-12-31T14:53:34.073Z"
+        }
+      ]
+    },
+    {
+      "name": "Save/Load Tests (Basic)",
+      "category": "SL",
+      "stats": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0,
+        "pending": 0
+      },
+      "tests": [
+        {
+          "id": "SL-0001",
+          "description": "セーブ機能",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.06739999999999924,
+          "timestamp": "2025-12-31T14:53:34.073Z"
+        },
+        {
+          "id": "SL-0002",
+          "description": "ロード機能",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.1443000000000012,
+          "timestamp": "2025-12-31T14:53:34.073Z"
+        },
+        {
+          "id": "SL-0003",
+          "description": "リセット機能",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0660000000000025,
+          "timestamp": "2025-12-31T14:53:34.073Z"
+        },
+        {
+          "id": "SL-0004",
+          "description": "データ永続性: pass",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.03640000000000043,
+          "timestamp": "2025-12-31T14:53:34.073Z"
+        },
+        {
+          "id": "SL-0005",
+          "description": "データ永続性: dribble",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.01180000000000092,
+          "timestamp": "2025-12-31T14:53:34.073Z"
+        },
+        {
+          "id": "SL-0006",
+          "description": "データ永続性: shoot",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.009900000000001796,
+          "timestamp": "2025-12-31T14:53:34.073Z"
+        }
+      ]
+    },
+    {
+      "name": "Bug Regression Tests (Basic)",
+      "category": "BUG",
+      "stats": {
+        "total": 20,
+        "passed": 20,
+        "failed": 0,
+        "skipped": 0,
+        "pending": 0
+      },
+      "tests": [
+        {
+          "id": "BUG-0001",
+          "description": "BUG-001: パス練習 フリーズなし",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.10500000000000398,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0002",
+          "description": "BUG-001: ドリブル練習 フリーズなし",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.019199999999997885,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0003",
+          "description": "BUG-001: シュート練習 フリーズなし",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.009900000000001796,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0004",
+          "description": "BUG-001: 総合練習 フリーズなし",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.01549999999999585,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0005",
+          "description": "BUG-001: 日進行 1日目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.038800000000001944,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0006",
+          "description": "BUG-001: 日進行 2日目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0073999999999969646,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0007",
+          "description": "BUG-001: 日進行 3日目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.044899999999998386,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0008",
+          "description": "BUG-001: 日進行 4日目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.009700000000002262,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0009",
+          "description": "BUG-001: 日進行 5日目",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.006300000000003081,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0010",
+          "description": "BUG-002: LW→P パス経路",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.02729999999999677,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0011",
+          "description": "BUG-002: RW→P パス経路",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0031000000000034333,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0012",
+          "description": "BUG-002: CB→P パス経路",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.003700000000002035,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0013",
+          "description": "BUG-002: LB→P パス経路",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0033999999999991815,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0014",
+          "description": "BUG-002: RB→P パス経路",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.003900000000001569,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0015",
+          "description": "BUG-003: LW 座標有効",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.020199999999995555,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0016",
+          "description": "BUG-003: RW 座標有効",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.00269999999999726,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0017",
+          "description": "BUG-003: CB 座標有効",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.002600000000001046,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0018",
+          "description": "BUG-003: LB 座標有効",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.002600000000001046,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0019",
+          "description": "BUG-003: RB 座標有効",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0025000000000048317,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        },
+        {
+          "id": "BUG-0020",
+          "description": "BUG-003: P 座標有効",
+          "status": "[x]",
+          "error": null,
+          "expected": null,
+          "actual": null,
+          "duration": 0.0025000000000048317,
+          "timestamp": "2025-12-31T14:53:34.074Z"
+        }
+      ]
+    }
+  ],
+  "failedTests": [
+    {
+      "suite": "Tournament Tests (Basic)",
+      "category": "TN",
+      "id": "TN-0002",
+      "description": "K航拿 シード位置",
+      "status": "[!]",
+      "error": "K航拿 should be seeded",
+      "expected": null,
+      "actual": null,
+      "duration": 0.33200000000000074,
+      "timestamp": "2025-12-31T14:53:34.071Z"
+    }
+  ]
+}

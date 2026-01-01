@@ -1,0 +1,54 @@
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+
+node cli/match-pattern-test.js 6! 0.001
+
+=== 結果 ===
+総パターン数: 124,302,600件
+テスト実行数: 1,229件
+成功（正常終了）: 1,220件
+失敗（エラー）: 9件
+実行時間: 45.0秒
+
+手数別パターン数:
+  6手: 124,302,600件
+
+結果種別:
+  intercepted: 698件
+  goal: 522件
+  dribble_distance_mismatch: 6件
+  dribble_next_action_mismatch: 5件
+  dribble_pass_to_mismatch: 4件
+
+============================================================
+エラー詳細
+============================================================
+
+--- verification_failed (9件) ---
+
+【詳細】LW:lem→RW:tom→LW:les→centershoot
+  ID: PT-6-000027
+  地域/ラウンド: 北海道/R2
+  期待遷移: LW→RW→LW
+  実際遷移: LW→RW→LW→CB
+  エラー: [dribble_distance_mismatch] ドリブル距離が不一致: 期待=10, 実際=30 期待:10 実際:30; [dribble_next_action_mismatch] ドリブル後アクションが不一致: 期待=shoot_center, 実際=pass 期待:"shoot_center" 実際:"pass"
+  アクション: tactic_start, dribble_start, dribble_interception_check, pass_start, line_interception_check, pass_success, ballholder_changed, tactic_start, dribble_start, dribble_interception_check
+  検証問題:
+    - [dribble_distance_mismatch] ドリブル距離が不一致: 期待=10, 実際=30 期待:10 実際:30
+    - [dribble_next_action_mismatch] ドリブル後アクションが不一致: 期待=shoot_center, 実際=pass 期待:"shoot_center" 実際:"pass"
+
+【他8件】
+  LW:ril→RB→LW:rim→LB→cornershoot | 期待:LW→RB→LW→LB | 実際:LW→RB→LW→LB→CB
+  LW:tom→LB→LW:tom→RB→cornershoot | 期待:LW→LB→LW→RB | 実際:LW→LB→LW→RB→CB
+  RW→LW:awm→RW→LW:awm→centershoot | 期待:RW→LW→RW→LW | 実際:RW→LW→RW→LW→CB
+  RB:tom→LB:lel→RB:tos→centershoot | 期待:RB→LB→RB | 実際:RB→LB→RB→CB
+  RB:awm→LB→RB:aws→CB→cornershoot | 期待:RB→LB→RB→CB | 実際:RB→LB→RB→CB
+  CB:ris→LB:tom→CB:ril→cornershoot | 期待:CB→LB→CB | 実際:CB→LB→CB
+  CB:les→P→LW→CB:les→cornershoot | 期待:CB→P→LW→CB | 実際:CB→P→LW→CB
+  LW:awm→RW→LW:aws→P→cornershoot | 期待:LW→RW→LW→P | 実際:LW→RW→LW→P→CB
+
+============================================================
+修正優先度（発生数順）
+============================================================
+       6件 | dribble_distance_mismatch | 不明
+       5件 | dribble_next_action_mismatch | 不明
+       4件 | dribble_pass_to_mismatch | 不明

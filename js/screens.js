@@ -1,7 +1,7 @@
 // screens.js - UI Screen Management
 
 import { CONFIG } from './config.js';
-import { gameState, initializeNewGame, saveGame, loadGame, hasSaveData, advanceDay, recordMatchResult, setCurrentMatch, clearCurrentMatch, isBoycottActive, changeCaptainPersonality, applyBoycottRestPenalty } from './gameState.js';
+import { gameState, initializeNewGame, saveGame, loadGame, hasSaveData, advanceDay, recordMatchResult, setCurrentMatch, clearCurrentMatch, isBoycottActive, changeCaptainPersonality, applyBoycottRestPenalty, saveLastTactics, getLastTactics, saveTacticsPreset, getTacticsPresets, getTacticsPreset, deleteTacticsPreset } from './gameState.js';
 import { initializeTournament, getNextOpponent, getCurrentRoundName, getSimplifiedBracket, processRoundResults, advanceTournament } from './tournament.js';
 import { getAvailableMenus, previewTrainingGrowth, executeTraining, getCaptainInfo } from './training.js';
 import { MatchSimulator, createTactic, validateTactics } from './match.js';
@@ -19,25 +19,37 @@ function startLoadingAssets() {
     }
 }
 
-// Senryu data (loaded from Random_Senryu.txt)
-let senryuData = null;
+// Senryu data cache
+let senryuCache = null;
 
-// Load senryu data
+// Load senryu data from external files
 async function loadSenryuData() {
-    if (senryuData) return senryuData;
+    if (senryuCache) return senryuCache;
+
+    const files = [
+        'docs/Random Senryu/Random_Senryu_01.txt',  // 上の句
+        'docs/Random Senryu/Random_Senryu_02.txt',  // 中の句
+        'docs/Random Senryu/Random_Senryu_03.txt'   // 下の句
+    ];
 
     try {
-        const response = await fetch('Random_Senryu.txt');
-        const data = await response.json();
-        senryuData = data;
-        return data;
+        const [kamiRes, nakaRes, shimoRes] = await Promise.all(
+            files.map(f => fetch(f).then(r => r.ok ? r.text() : Promise.reject()))
+        );
+
+        senryuCache = {
+            kami: kamiRes.split('\n').filter(l => l.trim()),
+            naka: nakaRes.split('\n').filter(l => l.trim()),
+            shimo: shimoRes.split('\n').filter(l => l.trim())
+        };
+        return senryuCache;
     } catch (error) {
-        console.error('Failed to load senryu data:', error);
-        // Return default data if loading fails
+        console.warn('川柳ファイル読み込み失敗、デフォルト使用:', error);
+        // フォールバック
         return {
-            kami: ["ずっきゅんと"],
-            naka: ["ずきゅずきゅずっきゅん"],
-            shimo: ["たまんない"]
+            kami: ["ずっきゅんと", "おっさんが", "たまにはさ"],
+            naka: ["ずきゅずきゅずっきゅん", "イチゴを食べて", "外で遊んで"],
+            shimo: ["たまんない", "んなアホな", "がけっぷち"]
         };
     }
 }
@@ -73,6 +85,12 @@ export function switchScreen(screenName, data = {}) {
     const container = document.getElementById('game-container');
     container.innerHTML = '';
     container.className = `screen-${screenName}`;
+
+    // MATCH画面以外に遷移する場合はmatchSimulatorをクリーンアップ
+    if (screenName !== SCREENS.MATCH && matchSimulator) {
+        matchSimulator.destroy();
+        matchSimulator = null;
+    }
 
     // 設定ボタンを追加（全画面共通）
     addSettingsButton(container);
@@ -145,6 +163,35 @@ function showSettingsModal() {
     soundLabel.appendChild(muteBtn);
     modalContent.appendChild(soundLabel);
 
+    // 試合中または作戦設定中の場合は「試合前に戻る」ボタンを追加
+    console.log('showSettingsModal: currentScreen=', currentScreen, 'SCREENS.MATCH=', SCREENS.MATCH, 'gameState.currentMatch=', gameState.currentMatch);
+
+    if (currentScreen === SCREENS.MATCH && gameState.currentMatch) {
+        // 試合中 → 作戦設定画面に戻る
+        const backToSetupBtn = createButton('作戦設定に戻る', () => {
+            modal.remove();
+            if (matchSimulator) {
+                matchSimulator.destroy();
+                matchSimulator = null;
+            }
+            switchScreen(SCREENS.MATCH_SETUP, {
+                opponent: gameState.currentMatch.opponent,
+                retryMode: true
+            });
+        }, 'btn btn-warning');
+        modalContent.appendChild(backToSetupBtn);
+    }
+
+    if (currentScreen === SCREENS.MATCH_SETUP && gameState.currentMatch) {
+        // 作戦設定画面 → 平日画面に戻る
+        const backToMainBtn = createButton('平日画面に戻る', () => {
+            modal.remove();
+            clearCurrentMatch();
+            switchScreen(SCREENS.MAIN);
+        }, 'btn btn-warning');
+        modalContent.appendChild(backToMainBtn);
+    }
+
     // 閉じるボタン
     const closeBtn = createButton('閉じる', () => {
         modal.remove();
@@ -187,12 +234,24 @@ function playScreenBGM(screenName) {
 function renderTitleScreen(container) {
     const titleDiv = createElement('div', 'title-screen');
 
-    // オープニング画像を背景として設定
-    const openingImg = assetManager.getImage('opening');
-    if (openingImg) {
-        titleDiv.style.backgroundImage = `url(${openingImg.src})`;
-        titleDiv.style.backgroundSize = 'cover';
-        titleDiv.style.backgroundPosition = 'center';
+    // オープニング画像を背景として設定する関数
+    const applyBackgroundImage = () => {
+        const openingImg = assetManager.getImage('opening');
+        if (openingImg) {
+            titleDiv.style.backgroundImage = `url(${openingImg.src})`;
+            titleDiv.style.backgroundSize = 'cover';
+            titleDiv.style.backgroundPosition = 'center';
+        }
+    };
+
+    // 既にロード済みなら即座に適用
+    applyBackgroundImage();
+
+    // まだロード中なら、ロード完了時に再適用
+    if (!assetManager.isLoaded()) {
+        assetManager.loadImages().then(() => {
+            applyBackgroundImage();
+        });
     }
 
     const title = createElement('h1', 'game-title', CONFIG.MESSAGES.TITLE.gameTitle);
@@ -317,6 +376,12 @@ function renderMainScreen(container) {
     }, 'btn btn-secondary');
     actionDiv.appendChild(tournamentBtn);
 
+    // Tactics presets management button
+    const tacticsBtn = createButton('作戦セット管理', () => {
+        showTacticsPresetsManagementModal();
+    }, 'btn btn-secondary');
+    actionDiv.appendChild(tacticsBtn);
+
     // Reset button (add to action buttons for visibility)
     let resetClickCount = 0;
     let resetTimeout = null;
@@ -421,13 +486,15 @@ function renderTrainingScreen(container) {
         const boycottMessage = createElement('p', 'boycott-message', '選手たちが練習をボイコットしています...');
         trainingDiv.appendChild(boycottMessage);
 
-        // Current stats
+        // Current stats (横並び表示)
         const statsDiv = createElement('div', 'current-stats');
         statsDiv.innerHTML = `
             <h3>現在の能力値</h3>
-            <p>パス: ${gameState.team.stats.pass.toFixed(1)}</p>
-            <p>ドリブル: ${gameState.team.stats.dribble.toFixed(1)}</p>
-            <p>シュート: ${gameState.team.stats.shoot.toFixed(1)}</p>
+            <div class="stats-row">
+                <span class="stat-item">🏐 パス: ${gameState.team.stats.pass.toFixed(1)}</span>
+                <span class="stat-item">⚽ ドリブル: ${gameState.team.stats.dribble.toFixed(1)}</span>
+                <span class="stat-item">🎯 シュート: ${gameState.team.stats.shoot.toFixed(1)}</span>
+            </div>
         `;
         trainingDiv.appendChild(statsDiv);
 
@@ -503,48 +570,75 @@ function renderTrainingScreen(container) {
     const header = createElement('h2', 'training-header', CONFIG.MESSAGES.TRAINING.selectMenu);
     trainingDiv.appendChild(header);
 
-    // Current stats
+    // Current stats (横並び表示)
     const statsDiv = createElement('div', 'current-stats');
     statsDiv.innerHTML = `
         <h3>現在の能力値</h3>
-        <p>パス: ${gameState.team.stats.pass.toFixed(1)}</p>
-        <p>ドリブル: ${gameState.team.stats.dribble.toFixed(1)}</p>
-        <p>シュート: ${gameState.team.stats.shoot.toFixed(1)}</p>
+        <div class="stats-row">
+            <span class="stat-item">🏐 パス: ${gameState.team.stats.pass.toFixed(1)}</span>
+            <span class="stat-item">⚽ ドリブル: ${gameState.team.stats.dribble.toFixed(1)}</span>
+            <span class="stat-item">🎯 シュート: ${gameState.team.stats.shoot.toFixed(1)}</span>
+        </div>
     `;
     trainingDiv.appendChild(statsDiv);
 
-    // Training menus
+    // Training menus - Table format
     const menus = getAvailableMenus();
-    const menuContainer = createElement('div', 'training-menu-container');
+    const menuTable = createElement('table', 'training-menu-table');
+
+    // Menu icons
+    const menuIcons = {
+        'パス練習': '🏐',
+        'ドリブル練習': '⚽',
+        'シュート練習': '🎯',
+        '総合練習': '📊',
+        '休養': '😴'
+    };
+
+    // Table header
+    const thead = createElement('thead');
+    thead.innerHTML = `
+        <tr>
+            <th class="menu-col">メニュー</th>
+            <th class="stat-col">パス</th>
+            <th class="stat-col">ドリブル</th>
+            <th class="stat-col">シュート</th>
+            <th class="action-col">選択</th>
+        </tr>
+    `;
+    menuTable.appendChild(thead);
+
+    const tbody = createElement('tbody');
 
     menus.forEach(menu => {
-        const menuDiv = createElement('div', 'training-menu-item');
-
-        const menuTitle = createElement('h4', 'menu-title', menu.name);
-        const menuDesc = createElement('p', 'menu-desc', menu.description);
-
-        menuDiv.appendChild(menuTitle);
-        menuDiv.appendChild(menuDesc);
-
-        // Show growth preview
+        const row = createElement('tr', 'training-menu-row');
         const preview = previewTrainingGrowth(menu.name);
-        if (preview) {
-            const previewDiv = createElement('div', 'growth-preview');
+        const icon = menuIcons[menu.name] || '📋';
 
-            // Debug log for total training
-            if (menu.name === '総合練習') {
-                console.log('総合練習プレビュー:', preview);
-            }
+        // Menu name cell with icon
+        const menuCell = createElement('td', 'menu-cell');
+        menuCell.innerHTML = `<span class="menu-icon">${icon}</span><span class="menu-name">${menu.name}</span>`;
+        row.appendChild(menuCell);
 
-            previewDiv.innerHTML = `
-                <span>パス: ${preview.pass || '-'}</span>
-                <span>ドリブル: ${preview.dribble || '-'}</span>
-                <span>シュート: ${preview.shoot || '-'}</span>
-            `;
-            menuDiv.appendChild(previewDiv);
-        }
+        // Stat cells
+        const passCell = createElement('td', 'stat-cell');
+        passCell.textContent = preview?.pass || '-';
+        if (preview?.pass && preview.pass !== '-') passCell.classList.add('stat-up');
+        row.appendChild(passCell);
 
-        const selectBtn = createButton('この練習をする', () => {
+        const dribbleCell = createElement('td', 'stat-cell');
+        dribbleCell.textContent = preview?.dribble || '-';
+        if (preview?.dribble && preview.dribble !== '-') dribbleCell.classList.add('stat-up');
+        row.appendChild(dribbleCell);
+
+        const shootCell = createElement('td', 'stat-cell');
+        shootCell.textContent = preview?.shoot || '-';
+        if (preview?.shoot && preview.shoot !== '-') shootCell.classList.add('stat-up');
+        row.appendChild(shootCell);
+
+        // Action cell
+        const actionCell = createElement('td', 'action-cell');
+        const selectBtn = createButton('選択', () => {
             audioManager.playSE('training_select');
             const result = executeTraining(menu.name);
             if (result.success) {
@@ -555,25 +649,25 @@ function renderTrainingScreen(container) {
             } else {
                 alert(result.message);
             }
-        }, 'btn btn-primary');
+        }, 'btn btn-primary btn-small');
+        actionCell.appendChild(selectBtn);
 
-        menuDiv.appendChild(selectBtn);
-
-        // Add "fill all days until match" button if Round 3 cleared
-        if (gameState.tournament.currentRound >= 4 && gameState.currentDay >= 1 && gameState.currentDay <= 5) {
+        // Add "fill all" button on weekdays
+        if (gameState.currentDay >= 1 && gameState.currentDay <= 5) {
             let fillClickCount = 0;
             let fillTimeout = null;
-            const fillAllBtn = createButton('次の試合までは全てこの練習', () => {
+            const fillAllBtn = createButton('全日', () => {
                 const daysUntilMatch = 6 - gameState.currentDay;
                 fillClickCount++;
 
                 if (fillClickCount === 1) {
-                    fillAllBtn.textContent = `📅 残り${daysUntilMatch}日間「${menu.name}」を実行。もう一度押してください`;
+                    fillAllBtn.textContent = `${daysUntilMatch}日`;
                     fillAllBtn.style.backgroundColor = '#ff9900';
+                    fillAllBtn.title = `残り${daysUntilMatch}日間「${menu.name}」を実行。もう一度押してください`;
 
                     fillTimeout = setTimeout(() => {
                         fillClickCount = 0;
-                        fillAllBtn.textContent = '次の試合までは全てこの練習';
+                        fillAllBtn.textContent = '全日';
                         fillAllBtn.style.backgroundColor = '';
                     }, 4000);
                 } else if (fillClickCount >= 2) {
@@ -585,11 +679,11 @@ function renderTrainingScreen(container) {
                             successCount++;
                             advanceDay();
                         } else {
-                            fillAllBtn.textContent = `❌ ${i + 1}日目で失敗: ${result.message}`;
+                            fillAllBtn.textContent = '❌';
                             fillAllBtn.style.backgroundColor = '#cc0000';
                             setTimeout(() => {
                                 fillClickCount = 0;
-                                fillAllBtn.textContent = '次の試合までは全てこの練習';
+                                fillAllBtn.textContent = '全日';
                                 fillAllBtn.style.backgroundColor = '';
                             }, 3000);
                             return;
@@ -597,7 +691,7 @@ function renderTrainingScreen(container) {
                     }
 
                     if (successCount > 0) {
-                        fillAllBtn.textContent = `✅ ${successCount}日間の${menu.name}を完了！`;
+                        fillAllBtn.textContent = '✅';
                         fillAllBtn.style.backgroundColor = '#00cc66';
                         saveGame();
                         setTimeout(() => {
@@ -605,15 +699,17 @@ function renderTrainingScreen(container) {
                         }, 2000);
                     }
                 }
-            }, 'btn btn-secondary btn-fill-all');
-
-            menuDiv.appendChild(fillAllBtn);
+            }, 'btn btn-secondary btn-small');
+            fillAllBtn.title = '次の試合まで全てこの練習';
+            actionCell.appendChild(fillAllBtn);
         }
 
-        menuContainer.appendChild(menuDiv);
+        row.appendChild(actionCell);
+        tbody.appendChild(row);
     });
 
-    trainingDiv.appendChild(menuContainer);
+    menuTable.appendChild(tbody);
+    trainingDiv.appendChild(menuTable);
 
     // Back button
     const backBtn = createButton('戻る', () => {
@@ -672,12 +768,14 @@ function renderMatchSetupScreen(container, data) {
     setupDiv.appendChild(opponentInfo);
     setupDiv.appendChild(statsComparison);
 
-    // Load saved tactics if in retry mode
+    // Load saved tactics if in retry mode, or load last tactics for new match
     if (data.retryMode && gameState.currentMatch.savedTactics.length > 0) {
         currentTactics = deepClone(gameState.currentMatch.savedTactics);
         // Keep the failedTacticIndex for red highlighting
     } else {
-        currentTactics = [];
+        // Try to load last used tactics as default
+        const lastTactics = getLastTactics();
+        currentTactics = lastTactics.length > 0 ? lastTactics : [];
         // Reset failed tactic index when starting fresh
         if (gameState.currentMatch) {
             gameState.currentMatch.failedTacticIndex = null;
@@ -982,18 +1080,36 @@ function renderMatchSetupScreen(container, data) {
     }
 
     function createPositionSelect(id) {
-        const select = createElement('select', id);
+        const select = createElement('select', '');
+        select.id = id;
         const positions = ['LW', 'RW', 'CB', 'LB', 'RB', 'P'];
+        const positionKeys = ['LW', 'RW', 'CB', 'LB', 'RB', 'P'];
 
         const defaultOption = createElement('option');
         defaultOption.value = '';
         defaultOption.textContent = '選択...';
         select.appendChild(defaultOption);
 
-        positions.forEach(pos => {
+        positions.forEach((pos, index) => {
             const option = createElement('option');
             option.value = pos;
-            option.textContent = `${CONFIG.POSITIONS[pos].name} (${pos})`;
+
+            // Check if this position is an ace or gear second
+            const isAce = gameState.team.aces.includes(index);
+            const isGearSecond = gameState.team.gearSecond.includes(index);
+
+            let displayName = CONFIG.POSITIONS[pos].name;
+            if (isGearSecond) {
+                displayName = `『${displayName}』★★`;  // Gear Second: double star
+            } else if (isAce) {
+                displayName = `『${displayName}』`;     // Ace: brackets
+            }
+
+            option.textContent = `${displayName} (${pos})`;
+            if (isAce || isGearSecond) {
+                option.style.fontWeight = 'bold';
+                option.style.color = isGearSecond ? '#ff6600' : '#cc0000';
+            }
             select.appendChild(option);
         });
 
@@ -1007,6 +1123,31 @@ function renderMatchSetupScreen(container, data) {
     }, 'btn btn-secondary');
     tacticBuilder.appendChild(clearBtn);
 
+    // Tactics preset controls
+    const presetControls = createElement('div', 'preset-controls');
+
+    // Save preset button
+    const savePresetBtn = createButton('作戦保存', () => {
+        if (currentTactics.length === 0) {
+            alert('保存する作戦がありません');
+            return;
+        }
+        const name = prompt('作戦名を入力してください:');
+        if (name && name.trim()) {
+            saveTacticsPreset(name.trim(), currentTactics);
+            alert(`作戦「${name.trim()}」を保存しました`);
+        }
+    }, 'btn btn-primary');
+    presetControls.appendChild(savePresetBtn);
+
+    // Load preset button
+    const loadPresetBtn = createButton('作戦読込', () => {
+        showTacticsPresetModal(tacticList);
+    }, 'btn btn-primary');
+    presetControls.appendChild(loadPresetBtn);
+
+    tacticBuilder.appendChild(presetControls);
+
     setupDiv.appendChild(tacticBuilder);
 
     // Start match button
@@ -1016,6 +1157,9 @@ function renderMatchSetupScreen(container, data) {
             alert(validation.error);
             return;
         }
+
+        // Save tactics for next match default
+        saveLastTactics(currentTactics);
 
         switchScreen(SCREENS.MATCH, { opponent: data.opponent, tactics: currentTactics });
     }, 'btn btn-success btn-large');
@@ -1126,7 +1270,8 @@ function renderMatchSetupScreen(container, data) {
 
                 // Re-render dribble controls
                 const dirLabel = createElement('label', '', '方向：');
-                const dirSelect = createElement('select', 'dir-select');
+                const dirSelect = createElement('select', '');
+                dirSelect.id = 'dir-select';
                 CONFIG.ACTION.DRIBBLE.directions.forEach(dir => {
                     const opt = createElement('option');
                     opt.value = dir.id;
@@ -1136,7 +1281,8 @@ function renderMatchSetupScreen(container, data) {
                 dirSelect.value = tactic.direction;
 
                 const distLabel = createElement('label', '', '距離：');
-                const distSelect = createElement('select', 'dist-select');
+                const distSelect = createElement('select', '');
+                distSelect.id = 'dist-select';
                 CONFIG.ACTION.DRIBBLE.distances.forEach(dist => {
                     const opt = createElement('option');
                     opt.value = dist.id;
@@ -1147,7 +1293,8 @@ function renderMatchSetupScreen(container, data) {
                 if (distConfig) distSelect.value = distConfig.id;
 
                 const nextLabel = createElement('label', '', '次の行動：');
-                const nextSelect = createElement('select', 'next-select');
+                const nextSelect = createElement('select', '');
+                nextSelect.id = 'next-select';
                 CONFIG.ACTION.DRIBBLE.nextActions.forEach(act => {
                     const opt = createElement('option');
                     opt.value = act.id;
@@ -1179,7 +1326,8 @@ function renderMatchSetupScreen(container, data) {
                 dynamicControls.appendChild(holderNote);
 
                 const typeLabel = createElement('label', '', 'シュートタイプ：');
-                const typeSelect = createElement('select', 'shoot-type-select');
+                const typeSelect = createElement('select', '');
+                typeSelect.id = 'shoot-type-select';
                 CONFIG.ACTION.SHOOT.types.forEach(type => {
                     const opt = createElement('option');
                     opt.value = type.id;
@@ -1228,14 +1376,16 @@ function renderMatchSetupScreen(container, data) {
 
                         if (nextSelect.value === 'pass') {
                             const passToSelect = document.getElementById('pass-to-select');
-                            if (passToSelect && passToSelect.value) {
-                                // Validate that pass is not to the same person
-                                if (ballHolder === passToSelect.value) {
-                                    alert('同じポジションにはパスできません');
-                                    return;
-                                }
-                                newTactic.passTo = passToSelect.value;
+                            if (!passToSelect || !passToSelect.value) {
+                                alert('パス先を選択してください');
+                                return;
                             }
+                            // Validate that pass is not to the same person
+                            if (ballHolder === passToSelect.value) {
+                                alert('同じポジションにはパスできません');
+                                return;
+                            }
+                            newTactic.passTo = passToSelect.value;
                         }
                     }
                 } else if (tactic.type === 'shoot') {
@@ -1311,11 +1461,12 @@ function renderMatchSetupScreen(container, data) {
                 const toPos = CONFIG.POSITIONS[tactic.to];
                 text += `${fromPos.name}が${toPos.name}にパス`;
             } else if (tactic.type === 'dribble') {
+                const dribblePos = CONFIG.POSITIONS[ballHolder];
                 const dirLabel = CONFIG.ACTION.DRIBBLE.directions.find(d => d.id === tactic.direction)?.label || tactic.direction;
                 const distLabel = CONFIG.ACTION.DRIBBLE.distances.find(d => d.distance === tactic.distance)?.label || tactic.duration + '秒';
                 const nextLabel = CONFIG.ACTION.DRIBBLE.nextActions.find(a => a.id === tactic.nextAction)?.label || tactic.nextAction;
 
-                text += `${dirLabel}に${distLabel}ドリブル → ${nextLabel}`;
+                text += `${dribblePos.name}: ${dirLabel}に${distLabel}ドリブル → ${nextLabel}`;
 
                 if (tactic.nextAction === 'pass' && tactic.passTo) {
                     const passToPos = CONFIG.POSITIONS[tactic.passTo];
@@ -1821,7 +1972,8 @@ function renderResultScreen(container, data) {
     const resultHeader = createElement('h2', `result-header ${resultClass}`, resultText);
     resultDiv.appendChild(resultHeader);
 
-    const scoreDisplay = createElement('div', 'final-score');
+    const scoreClass = data.won ? 'score-win' : 'score-lose';
+    const scoreDisplay = createElement('div', `final-score ${scoreClass}`);
     scoreDisplay.innerHTML = `
         <h3>${gameState.team.name} ${data.score.player} - ${data.score.opponent} ${data.opponent.name}</h3>
     `;
@@ -1850,10 +2002,8 @@ function renderResultScreen(container, data) {
         if (gameState.championshipWon) {
             const championText = createElement('p', 'championship-text', CONFIG.MESSAGES.RESULT.championship);
             resultDiv.appendChild(championText);
-        } else {
-            const nextRoundText = createElement('p', 'next-round-text', '次の試合に進みます');
-            resultDiv.appendChild(nextRoundText);
         }
+        // Removed: 次の試合に進みます (redundant with "次へ進む" button)
     } else {
         const gameOverText = createElement('p', 'game-over-text', 'ゲームオーバー');
         resultDiv.appendChild(gameOverText);
@@ -1923,6 +2073,148 @@ function renderTournamentScreen(container) {
     tournamentDiv.appendChild(backBtn);
 
     container.appendChild(tournamentDiv);
+}
+
+// Show tactics presets management modal (from main screen)
+function showTacticsPresetsManagementModal() {
+    const presets = getTacticsPresets();
+
+    // Create modal overlay
+    const overlay = createElement('div', 'modal-overlay');
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;';
+
+    const modal = createElement('div', 'modal-content');
+    modal.style.cssText = 'background: white; padding: 20px; border-radius: 8px; max-width: 400px; width: 90%; max-height: 80%; overflow-y: auto;';
+
+    const title = createElement('h3', '', '作戦セット管理');
+    modal.appendChild(title);
+
+    const info = createElement('p', '', '試合開始前画面で作戦を保存できます。');
+    info.style.cssText = 'font-size: 12px; color: #666; margin-bottom: 10px;';
+    modal.appendChild(info);
+
+    if (presets.length === 0) {
+        const noPresets = createElement('p', '', '保存された作戦がありません');
+        modal.appendChild(noPresets);
+    } else {
+        const presetList = createElement('div', 'preset-list');
+        presetList.style.cssText = 'margin: 10px 0;';
+
+        presets.forEach(preset => {
+            const presetItem = createElement('div', 'preset-item');
+            presetItem.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #ccc; margin-bottom: 5px; border-radius: 4px;';
+
+            const nameSpan = createElement('span', '', `${preset.name} (${preset.tactics.length}手)`);
+            nameSpan.style.cssText = 'flex: 1;';
+
+            const deleteBtn = createButton('削除', (e) => {
+                e.stopPropagation();
+                if (confirm(`作戦「${preset.name}」を削除しますか？`)) {
+                    deleteTacticsPreset(preset.name);
+                    presetItem.remove();
+                    if (presetList.children.length === 0) {
+                        presetList.innerHTML = '<p>保存された作戦がありません</p>';
+                    }
+                }
+            }, 'btn btn-danger btn-small');
+            deleteBtn.style.cssText = 'margin-left: 10px; padding: 4px 8px; font-size: 12px;';
+
+            presetItem.appendChild(nameSpan);
+            presetItem.appendChild(deleteBtn);
+            presetList.appendChild(presetItem);
+        });
+
+        modal.appendChild(presetList);
+    }
+
+    const closeBtn = createButton('閉じる', () => {
+        document.body.removeChild(overlay);
+    }, 'btn btn-secondary');
+    closeBtn.style.cssText = 'margin-top: 10px;';
+    modal.appendChild(closeBtn);
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Close on overlay click
+    overlay.onclick = (e) => {
+        if (e.target === overlay) {
+            document.body.removeChild(overlay);
+        }
+    };
+}
+
+// Show tactics preset modal for loading/deleting presets
+function showTacticsPresetModal(tacticList) {
+    const presets = getTacticsPresets();
+
+    // Create modal overlay
+    const overlay = createElement('div', 'modal-overlay');
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;';
+
+    const modal = createElement('div', 'modal-content');
+    modal.style.cssText = 'background: white; padding: 20px; border-radius: 8px; max-width: 400px; width: 90%; max-height: 80%; overflow-y: auto;';
+
+    const title = createElement('h3', '', '作戦セット一覧');
+    modal.appendChild(title);
+
+    if (presets.length === 0) {
+        const noPresets = createElement('p', '', '保存された作戦がありません');
+        modal.appendChild(noPresets);
+    } else {
+        const presetList = createElement('div', 'preset-list');
+        presetList.style.cssText = 'margin: 10px 0;';
+
+        presets.forEach(preset => {
+            const presetItem = createElement('div', 'preset-item');
+            presetItem.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 8px; border: 1px solid #ccc; margin-bottom: 5px; border-radius: 4px;';
+
+            const nameSpan = createElement('span', '', preset.name);
+            nameSpan.style.cssText = 'flex: 1; cursor: pointer;';
+            nameSpan.onclick = () => {
+                const tactics = getTacticsPreset(preset.name);
+                if (tactics) {
+                    currentTactics = tactics;
+                    updateTacticList(tacticList);
+                    document.body.removeChild(overlay);
+                }
+            };
+
+            const deleteBtn = createButton('削除', (e) => {
+                e.stopPropagation();
+                if (confirm(`作戦「${preset.name}」を削除しますか？`)) {
+                    deleteTacticsPreset(preset.name);
+                    presetItem.remove();
+                    if (presetList.children.length === 0) {
+                        presetList.innerHTML = '<p>保存された作戦がありません</p>';
+                    }
+                }
+            }, 'btn btn-danger btn-small');
+            deleteBtn.style.cssText = 'margin-left: 10px; padding: 4px 8px; font-size: 12px;';
+
+            presetItem.appendChild(nameSpan);
+            presetItem.appendChild(deleteBtn);
+            presetList.appendChild(presetItem);
+        });
+
+        modal.appendChild(presetList);
+    }
+
+    const closeBtn = createButton('閉じる', () => {
+        document.body.removeChild(overlay);
+    }, 'btn btn-secondary');
+    closeBtn.style.cssText = 'margin-top: 10px;';
+    modal.appendChild(closeBtn);
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Close on overlay click
+    overlay.onclick = (e) => {
+        if (e.target === overlay) {
+            document.body.removeChild(overlay);
+        }
+    };
 }
 
 // Initialize screens module

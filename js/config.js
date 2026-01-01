@@ -15,7 +15,14 @@ export const FINAL_BOSS = {
     prefecture: "K航拿",
     description: "偏差値の超高い進学校",
     uniformColor: "#ff0000",
-    guaranteedFinal: true
+    guaranteedFinal: true,
+    // 決勝戦での特殊判定（絶対に勝てない）
+    finalMatchRates: {
+        passInterceptRate: 0.67,      // パスカット率 67%
+        dribbleInterceptRate: 0.67,   // ドリブルカット率 67%
+        shootBlockByFP: 0.67,         // フィールドプレーヤーによるシュートブロック率 67%
+        shootBlockByGK: 1.0           // GKによるシュートブロック率 100%
+    }
 };
 
 export const PREFECTURES = [
@@ -439,7 +446,7 @@ export const TEAM_NAME_FORMAT = {
 
 // 10. Debug Settings
 export const DEBUG_CONFIG = {
-    ENABLED: false,
+    ENABLED: true,
     SHOW_FPS: false,
     SHOW_HITBOX: false,
     FAST_FORWARD: false,

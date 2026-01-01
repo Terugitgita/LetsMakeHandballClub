@@ -5,8 +5,21 @@ import { getRegion, getTeamName, generateRandomStat, shuffle } from './utils.js'
 
 // Generate team stats based on round
 export function generateTeamStats(round) {
-    const roundKey = CONFIG.ROUND_MAPPING[round];
+    // ラウンドが範囲外（7以上）の場合は決勝のステータスを使用
+    const clampedRound = Math.min(Math.max(round, 1), 6);
+    const roundKey = CONFIG.ROUND_MAPPING[clampedRound];
     const statsRange = CONFIG.OPPONENT[roundKey];
+
+    // 念のためnullチェック
+    if (!statsRange) {
+        console.warn(`generateTeamStats: Invalid round ${round}, using FINAL stats`);
+        const finalStats = CONFIG.OPPONENT.FINAL;
+        return {
+            pass: generateRandomStat(finalStats.min, finalStats.max, true),
+            dribble: generateRandomStat(finalStats.min, finalStats.max, true),
+            shoot: generateRandomStat(finalStats.min, finalStats.max, true)
+        };
+    }
 
     return {
         pass: generateRandomStat(statsRange.min, statsRange.max, true),
@@ -142,20 +155,35 @@ export function getPlayerOpponent(bracket, playerTeamId, round) {
 
 // Simulate match between two AI teams
 export function simulateAIMatch(team1, team2) {
-    let team1Power = team1.stats.pass + team1.stats.dribble + team1.stats.shoot;
-    let team2Power = team2.stats.pass + team2.stats.dribble + team2.stats.shoot;
+    // K航拿（てぇでぇ's学園）は必ず勝利する（決勝で必ず対戦するため）
+    const isFinalBoss1 = team1.prefecture === CONFIG.FINAL_BOSS.prefecture;
+    const isFinalBoss2 = team2.prefecture === CONFIG.FINAL_BOSS.prefecture;
 
-    // Add ace bonuses
-    team1Power += team1.aces.length * CONFIG.ACE.STAT_MULTIPLIER;
-    team2Power += team2.aces.length * CONFIG.ACE.STAT_MULTIPLIER;
+    let winner, loser;
 
-    // Calculate win probability
-    const team1WinProb = team1Power / (team1Power + team2Power);
+    if (isFinalBoss1) {
+        winner = team1;
+        loser = team2;
+    } else if (isFinalBoss2) {
+        winner = team2;
+        loser = team1;
+    } else {
+        // 通常のAI対戦
+        let team1Power = team1.stats.pass + team1.stats.dribble + team1.stats.shoot;
+        let team2Power = team2.stats.pass + team2.stats.dribble + team2.stats.shoot;
 
-    // Random determination with slight randomness
-    const roll = Math.random();
-    const winner = roll < team1WinProb ? team1 : team2;
-    const loser = winner === team1 ? team2 : team1;
+        // Add ace bonuses
+        team1Power += team1.aces.length * CONFIG.ACE.STAT_MULTIPLIER;
+        team2Power += team2.aces.length * CONFIG.ACE.STAT_MULTIPLIER;
+
+        // Calculate win probability
+        const team1WinProb = team1Power / (team1Power + team2Power);
+
+        // Random determination with slight randomness
+        const roll = Math.random();
+        winner = roll < team1WinProb ? team1 : team2;
+        loser = winner === team1 ? team2 : team1;
+    }
 
     // Generate realistic score
     const winnerScore = CONFIG.GAME.POINTS_TO_WIN;

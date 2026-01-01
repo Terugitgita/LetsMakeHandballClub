@@ -1,0 +1,21 @@
+  node cli/match-pattern-test.js 3 10
+
+
+=== 結果 ===
+総パターン数: 113,400件
+テスト実行数: 11,296件
+成功（正常終了）: 10,659件
+失敗（エラー）: 637件
+実行時間: 41.9秒
+
+手数別パターン数:
+  1手: 648件
+  2手: 11,016件
+  3手: 101,736件
+
+結果種別:
+  goal: 6,417件
+  intercepted: 4,242件
+  ballholder_mismatch: 637件
+
+ログ出力: F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\Test_Log\実行結果03.txt

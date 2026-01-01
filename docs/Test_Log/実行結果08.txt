@@ -1,0 +1,51 @@
+=== 結果 ===
+総パターン数: 147,705,525,000件
+テスト実行数: 1,000件
+成功（正常終了）: 979件
+失敗（エラー）: 21件
+実行時間: 7.0秒
+
+手数別パターン数:
+  9手: 147,705,525,000件
+
+結果種別:
+  intercepted: 812件
+  goal: 167件
+  verification_failed: 21件
+
+============================================================
+エラー詳細
+============================================================
+
+--- verification_failed (21件) ---
+
+【詳細】CB:les→RB:awl→RW→LB:ril→RB:aws→cornershoot
+  ID: PT-R9-0033
+  地域/ラウンド: 関東/R3
+  期待遷移: CB→RB→RW→LB→RB
+  実際遷移: CB→RB→RW→LB→RB→CB
+  エラー: [dribble_distance_mismatch] ドリブル距離が不一致: 期待=10, 実際=50 期待:10 実際:50; [dribble_next_action_mismatch] ドリブル後アクションが不一致: 期待=shoot_corner, 実際=pass 期待:"shoot_corner" 実際:"pass"
+  アクション: tactic_start, dribble_start, dribble_interception_check, pass_start, line_interception_check, pass_success, ballholder_changed, tactic_start, dribble_start, dribble_interception_check
+  検証問題:
+    - [dribble_distance_mismatch] ドリブル距離が不一致: 期待=10, 実際=50 期待:10 実際:50
+    - [dribble_next_action_mismatch] ドリブル後アクションが不一致: 期待=shoot_corner, 実際=pass 期待:"shoot_corner" 実際:"pass"
+
+【他20件】
+  CB:tos→LB:lem→CB:lem→RW→LB:les→cornershoot | 期待:CB→LB→CB→RW→LB | 実際:CB→LB→CB→RW→LB→CB
+  LB:ris→CB:lel→LW:awm→P→LW:awl→cornershoot | 期待:LB→CB→LW→P→LW | 実際:LB→CB→LW→P→LW→CB
+  RW:tos→RB:ris→RW:tol→CB:aws→LB→centershoot | 期待:RW→RB→RW→CB→LB | 実際:RW→RB→RW→CB→LB→CB
+  LW:lel→RB:lel→LW→LB:tol→RB:les→centershoot | 期待:LW→RB→LW→LB→RB | 実際:LW→RB→LW→LB→RB→CB
+  RB→LB:lel→CB:ril→RB→CB:ris→RW→cornershoot | 期待:RB→LB→CB→RB→CB→RW | 実際:RB→LB→CB→RB→CB→RW→CB
+  LB→P→CB:tol→RW→LW:rim→CB:tol→centershoot | 期待:LB→P→CB→RW→LW→CB | 実際:LB→P→CB→RW→LW→CB
+  LB:tom→CB:lel→LB:tol→CB:tom→P→cornershoot | 期待:LB→CB→LB→CB→P | 実際:LB→CB→LB→CB→P→CB
+  RB:les→CB:aws→RB:lem→RW:rim→RB→centershoot | 期待:RB→CB→RB→RW→RB | 実際:RB→CB→RB→RW→RB→CB
+  RW:rim→RB→RW:ril→LW→CB→LB→RB→cornershoot | 期待:RW→RB→RW→LW→CB→LB→RB | 実際:RW→RB→RW→LW→CB→LB→RB→CB
+  RW:tom→LW:les→LB→P:awl→LW:les→centershoot | 期待:RW→LW→LB→P→LW | 実際:RW→LW→LB→P→LW→CB
+  ... 他10件省略
+
+============================================================
+修正優先度（発生数順）
+============================================================
+      17件 | dribble_distance_mismatch | 不明
+      12件 | dribble_pass_to_mismatch | 不明
+       8件 | dribble_next_action_mismatch | 不明

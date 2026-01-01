@@ -1,0 +1,20 @@
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 1 100
+
+=== 結果 ===
+総パターン数: 648件
+テスト実行数: 648件
+成功（正常終了）: 648件
+失敗（エラー）: 0件
+実行時間: 1.1秒
+
+手数別パターン数:
+  1手: 648件
+
+結果種別:
+  goal: 500件
+  intercepted: 148件
+
+ログ出力: F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\Test_Log\実行結果01.txt
+
+F:\LetsMakeHandballClub_2\LetsMakeHandballClub>

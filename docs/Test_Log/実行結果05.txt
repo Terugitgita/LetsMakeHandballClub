@@ -1,0 +1,18 @@
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+
+=== 結果 ===
+総パターン数: 93,960件
+テスト実行数: 534件
+成功（正常終了）: 534件
+失敗（エラー）: 0件
+実行時間: 1.8秒
+
+手数別パターン数:
+  3手: 93,960件
+
+結果種別:
+  intercepted: 290件
+  goal: 244件
+

@@ -1,0 +1,50 @@
+=== 結果 ===
+総パターン数: 1,575,716,085,000件
+テスト実行数: 1,000件
+成功（正常終了）: 971件
+失敗（エラー）: 29件
+実行時間: 7.1秒
+
+手数別パターン数:
+  10手: 1,575,716,085,000件
+
+結果種別:
+  intercepted: 741件
+  goal: 230件
+  verification_failed: 29件
+
+============================================================
+エラー詳細
+============================================================
+
+--- verification_failed (29件) ---
+
+【詳細】LW:ril→RB→LW:ril→RW:lem→CB:ril→P→centershoot
+  ID: PT-R10-0063
+  地域/ラウンド: 北海道/R4
+  期待遷移: LW→RB→LW→RW→CB→P
+  実際遷移: LW→RB→LW→RW→CB→P→CB
+  エラー: [dribble_pass_to_mismatch] ドリブル後パス先が不一致: 期待=RW, 実際=RB 期待:"RW" 実際:"RB"
+  アクション: tactic_start, dribble_start, dribble_interception_check, pass_start, line_interception_check, pass_success, ballholder_changed, tactic_start, pass_start, line_interception_check
+  検証問題:
+    - [dribble_pass_to_mismatch] ドリブル後パス先が不一致: 期待=RW, 実際=RB 期待:"RW" 実際:"RB"
+
+【他28件】
+  CB:les→LB→LW:les→RW:awl→LW:lem→RB→centershoot | 期待:CB→LB→LW→RW→LW→RB | 実際:CB→LB→LW→RW→LW→RB→CB
+  RW:aws→CB→RW:aws→P→RB→LW→LB:les→cornershoot | 期待:RW→CB→RW→P→RB→LW→LB | 実際:RW→CB→RW→P→RB→LW→LB→CB
+  LB:awl→LW:awm→RW→LW:awl→RB→LB:les→cornershoot | 期待:LB→LW→RW→LW→RB→LB | 実際:LB→LW→RW→LW→RB→LB→CB
+  RW:ril→CB→RW:ris→RB→RW→RB→CB:ris→cornershoot | 期待:RW→CB→RW→RB→RW→RB→CB | 実際:RW→CB→RW→RB→RW→RB→CB
+  LW:tom→LB:ril→CB→LW:rim→RW→LB:ris→centershoot | 期待:LW→LB→CB→LW→RW→LB | 実際:LW→LB→CB→LW→RW→LB→CB
+  RB→P:tol→RW→P:tol→LW:awm→RB:ril→cornershoot | 期待:RB→P→RW→P→LW→RB | 実際:RB→P→RW→P→LW→RB→CB
+  CB:tos→RW:awl→CB:lel→RW→CB:tol→RB→centershoot | 期待:CB→RW→CB→RW→CB→RB | 実際:CB→RW→CB→RW→CB→RB→CB
+  LW:ril→RB:awl→LW:rim→CB→RW:awl→RB→centershoot | 期待:LW→RB→LW→CB→RW→RB | 実際:LW→RB→LW→CB→RW→RB→CB
+  LB:rim→LW:rim→LB:ril→P→RB:les→CB→centershoot | 期待:LB→LW→LB→P→RB→CB | 実際:LB→LW→LB→P→RB→CB
+  LB:ril→CB:lel→LW→LB:ris→CB→LB:awl→centershoot | 期待:LB→CB→LW→LB→CB→LB | 実際:LB→CB→LW→LB→CB→LB→CB
+  ... 他18件省略
+
+============================================================
+修正優先度（発生数順）
+============================================================
+      26件 | dribble_distance_mismatch | 不明
+      20件 | dribble_pass_to_mismatch | 不明
+       9件 | dribble_next_action_mismatch | 不明

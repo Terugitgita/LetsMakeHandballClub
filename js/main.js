@@ -1,8 +1,10 @@
 // main.js - Game Entry Point
 
 import { CONFIG, DEBUG_CONFIG } from './config.js';
-import { gameState, initializeNewGame, saveGame, loadGame, resetGame } from './gameState.js';
-import { initializeScreens } from './screens.js';
+import { gameState, initializeNewGame, saveGame, loadGame, resetGame, setCurrentMatch } from './gameState.js';
+import { initializeScreens, switchScreen, SCREENS } from './screens.js';
+import { initializeTournament } from './tournament.js';
+import { getPlayerOpponent } from './teams.js';
 
 // Initialize game on page load
 document.addEventListener('DOMContentLoaded', () => {
@@ -40,25 +42,33 @@ function setupViewport() {
     viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
 }
 
-// Prevent pull-to-refresh gesture on mobile
+// Prevent pull-to-refresh gesture on mobile (while allowing normal scrolling)
 function preventPullToRefresh() {
     let lastTouchY = 0;
-    let preventPullToRefresh = false;
 
     document.body.addEventListener('touchstart', (e) => {
         if (e.touches.length !== 1) return;
         lastTouchY = e.touches[0].clientY;
-        preventPullToRefresh = window.pageYOffset === 0;
-    });
+    }, { passive: true });
 
     document.body.addEventListener('touchmove', (e) => {
+        const container = document.getElementById('game-container');
+        if (!container) return;
+
         const touchY = e.touches[0].clientY;
         const touchYDelta = touchY - lastTouchY;
         lastTouchY = touchY;
 
-        if (preventPullToRefresh && touchYDelta > 0) {
+        // Only prevent pull-to-refresh when:
+        // 1. Container is scrolled to top (scrollTop === 0)
+        // 2. User is trying to scroll down (pull down gesture)
+        const isAtTop = container.scrollTop === 0;
+        const isPullingDown = touchYDelta > 0;
+
+        if (isAtTop && isPullingDown) {
             e.preventDefault();
         }
+        // All other cases: allow normal scrolling (up and down)
     }, { passive: false });
 }
 
@@ -154,12 +164,32 @@ function setupDebugTools() {
 
         // Advance to finals
         advanceToFinals: () => {
+            // ゲームが初期化されていなければ初期化
+            if (!gameState.team || !gameState.tournament.bracket) {
+                initializeNewGame();
+                initializeTournament();
+            }
             gameState.currentWeek = 6;
             gameState.currentDay = 6;
             gameState.tournament.currentRound = 6;
+
+            // 他のチームを全て敗退させて、てぇでぇ's学園のみ残す
+            const bracket = gameState.tournament.bracket;
+            const playerTeamId = gameState.tournament.playerTeamId;
+            for (let i = 0; i < bracket.length; i++) {
+                if (i !== playerTeamId && bracket[i].prefecture !== CONFIG.FINAL_BOSS.prefecture) {
+                    bracket[i].eliminated = true;
+                }
+            }
+
             saveGame();
             console.log('Advanced to finals!');
-            location.reload();
+
+            // 対戦相手を取得して試合準備画面へ遷移
+            const opponent = getPlayerOpponent(bracket, playerTeamId, 6);
+            console.log('Final opponent:', opponent);
+            setCurrentMatch(opponent);
+            switchScreen(SCREENS.MATCH_SETUP, { opponent });
         }
     };
 

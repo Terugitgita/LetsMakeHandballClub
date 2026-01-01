@@ -1,0 +1,50 @@
+=== 結果 ===
+総パターン数: 13,953,141,000件
+テスト実行数: 1,000件
+成功（正常終了）: 982件
+失敗（エラー）: 18件
+実行時間: 6.4秒
+
+手数別パターン数:
+  8手: 13,953,141,000件
+
+結果種別:
+  intercepted: 769件
+  goal: 213件
+  verification_failed: 18件
+
+============================================================
+エラー詳細
+============================================================
+
+--- verification_failed (18件) ---
+
+【詳細】CB→RW:rim→LW→RB→RW:rim→CB→centershoot
+  ID: PT-R8-0197
+  地域/ラウンド: K航拿/R3
+  期待遷移: CB→RW→LW→RB→RW→CB
+  実際遷移: CB→RW→LW→RB→RW→CB
+  エラー: [dribble_pass_to_mismatch] ドリブル後パス先が不一致: 期待=CB, 実際=LW 期待:"CB" 実際:"LW"
+  アクション: tactic_start, pass_start, line_interception_check, pass_success, ballholder_changed, tactic_start, dribble_start, dribble_interception_check, pass_start, line_interception_check
+  検証問題:
+    - [dribble_pass_to_mismatch] ドリブル後パス先が不一致: 期待=CB, 実際=LW 期待:"CB" 実際:"LW"
+
+【他17件】
+  CB:aws→RW→CB:aws→RB:aws→CB→cornershoot | 期待:CB→RW→CB→RB→CB | 実際:CB→RW→CB→RB→CB
+  P:ris→LW→LB→CB→P:rim→RB→cornershoot | 期待:P→LW→LB→CB→P→RB | 実際:P→LW→LB→CB→P→RB→CB
+  RB→P:lem→RB→P:lem→LB→P→centershoot | 期待:RB→P→RB→P→LB→P | 実際:RB→P→RB→P→LB→P→CB
+  P:lem→LB:tol→P:les→RB→LB→centershoot | 期待:P→LB→P→RB→LB | 実際:P→LB→P→RB→LB→CB
+  P:awm→RW:rim→P:tos→RW:rim→cornershoot | 期待:P→RW→P→RW | 実際:P→RW→P→RW→CB
+  LB:ril→P:ril→LB:rim→P→RB→centershoot | 期待:LB→P→LB→P→RB | 実際:LB→P→LB→P→RB→CB
+  RW:awm→RB→RW:awl→LB:les→RW→centershoot | 期待:RW→RB→RW→LB→RW | 実際:RW→RB→RW→LB→RW→CB
+  LW:lem→LB:les→LW:les→CB:ris→centershoot | 期待:LW→LB→LW→CB | 実際:LW→LB→LW→CB
+  CB→RB:tom→P:ris→RB:tos→CB→centershoot | 期待:CB→RB→P→RB→CB | 実際:CB→RB→P→RB→CB
+  CB:awl→LB→LW→RW:lel→CB:awm→centershoot | 期待:CB→LB→LW→RW→CB | 実際:CB→LB→LW→RW→CB
+  ... 他7件省略
+
+============================================================
+修正優先度（発生数順）
+============================================================
+      13件 | dribble_pass_to_mismatch | 不明
+      12件 | dribble_distance_mismatch | 不明
+       3件 | dribble_next_action_mismatch | 不明

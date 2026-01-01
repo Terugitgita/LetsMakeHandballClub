@@ -1,0 +1,51 @@
+=== 結果 ===
+総パターン数: 124,302,600件
+テスト実行数: 10,000件
+成功（正常終了）: 9,927件
+失敗（エラー）: 73件
+実行時間: 52.0秒
+
+手数別パターン数:
+  6手: 124,302,600件
+
+結果種別:
+  intercepted: 6,828件
+  goal: 3,099件
+  verification_failed: 73件
+
+============================================================
+エラー詳細
+============================================================
+
+--- verification_failed (73件) ---
+
+【詳細】P:awl→LB:tol→P:awm→centershoot
+  ID: PT-R6-0085
+  地域/ラウンド: 北海道/R4
+  期待遷移: P→LB→P
+  実際遷移: P→LB→P→CB
+  エラー: [dribble_distance_mismatch] ドリブル距離が不一致: 期待=30, 実際=50 期待:30 実際:50; [dribble_next_action_mismatch] ドリブル後アクションが不一致: 期待=shoot_center, 実際=pass 期待:"shoot_center" 実際:"pass"
+  アクション: tactic_start, dribble_start, dribble_interception_check, pass_start, line_interception_check, pass_success, ballholder_changed, tactic_start, dribble_start, dribble_interception_check
+  検証問題:
+    - [dribble_distance_mismatch] ドリブル距離が不一致: 期待=30, 実際=50 期待:30 実際:50
+    - [dribble_next_action_mismatch] ドリブル後アクションが不一致: 期待=shoot_center, 実際=pass 期待:"shoot_center" 実際:"pass"
+
+【他72件】
+  P:lem→LB→P:lel→RW→centershoot | 期待:P→LB→P→RW | 実際:P→LB→P→RW→CB
+  RB:les→LB→RB:lel→LW→cornershoot | 期待:RB→LB→RB→LW | 実際:RB→LB→RB→LW→CB
+  LW:ris→LB:lem→LW:ris→centershoot | 期待:LW→LB→LW | 実際:LW→LB→LW→CB
+  RB:lem→RW→RB:lel→LB→centershoot | 期待:RB→RW→RB→LB | 実際:RB→RW→RB→LB→CB
+  RB→P:awl→LB→P:awl→centershoot | 期待:RB→P→LB→P | 実際:RB→P→LB→P→CB
+  LW:aws→LB:lel→LW:aws→cornershoot | 期待:LW→LB→LW | 実際:LW→LB→LW→CB
+  RB:rim→RW:tom→RB:ris→centershoot | 期待:RB→RW→RB | 実際:RB→RW→RB→CB
+  RB:tos→RW→LB→RB:tol→cornershoot | 期待:RB→RW→LB→RB | 実際:RB→RW→LB→RB→CB
+  CB→LW:lel→CB→LW:lem→centershoot | 期待:CB→LW→CB→LW | 実際:CB→LW→CB→LW→CB
+  CB→LB:aws→CB→LB:aws→centershoot | 期待:CB→LB→CB→LB | 実際:CB→LB→CB→LB→CB
+  ... 他62件省略
+
+============================================================
+修正優先度（発生数順）
+============================================================
+      52件 | dribble_distance_mismatch | 不明
+      47件 | dribble_next_action_mismatch | 不明
+      22件 | dribble_pass_to_mismatch | 不明

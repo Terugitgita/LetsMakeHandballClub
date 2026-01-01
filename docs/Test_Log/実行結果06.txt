@@ -1,0 +1,52 @@
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 6! n10000
+
+=== 結果 ===
+総パターン数: 1,298,997,000件
+テスト実行数: 1,000件
+成功（正常終了）: 989件
+失敗（エラー）: 11件
+実行時間: 6.5秒
+
+手数別パターン数:
+  7手: 1,298,997,000件
+
+結果種別:
+  intercepted: 660件
+  goal: 329件
+  verification_failed: 11件
+
+============================================================
+エラー詳細
+============================================================
+
+--- verification_failed (11件) ---
+
+【詳細】CB:tos→RB→CB:tol→RB:awm→cornershoot
+  ID: PT-R7-0011
+  地域/ラウンド: 九州/R5
+  期待遷移: CB→RB→CB→RB
+  実際遷移: CB→RB→CB→RB→CB
+  エラー: [dribble_distance_mismatch] ドリブル距離が不一致: 期待=50, 実際=10 期待:50 実際:10
+  アクション: tactic_start, dribble_start, dribble_interception_check, pass_start, line_interception_check, pass_success, ballholder_changed, tactic_start, pass_start, line_interception_check
+  検証問題:
+    - [dribble_distance_mismatch] ドリブル距離が不一致: 期待=50, 実際=10 期待:50 実際:10
+
+【他10件】
+  CB:rim→RW→LW:rim→CB:rim→centershoot | 期待:CB→RW→LW→CB | 実際:CB→RW→LW→CB
+  LW→CB:tos→LB→CB:tos→P→centershoot | 期待:LW→CB→LB→CB→P | 実際:LW→CB→LB→CB→P→CB
+  LB:awl→LW:lem→LB:aws→LW→cornershoot | 期待:LB→LW→LB→LW | 実際:LB→LW→LB→LW→CB
+  RW:tos→CB→RW:tos→RB:awm→cornershoot | 期待:RW→CB→RW→RB | 実際:RW→CB→RW→RB→CB
+  RW:ril→LW:ril→RW:ris→LW→centershoot | 期待:RW→LW→RW→LW | 実際:RW→LW→RW→LW→CB
+  LW:awl→CB→LB:lem→LW:awm→cornershoot | 期待:LW→CB→LB→LW | 実際:LW→CB→LB→LW→CB
+  CB→LB:tos→CB→RW→LB:tol→cornershoot | 期待:CB→LB→CB→RW→LB | 実際:CB→LB→CB→RW→LB→CB
+  RB:rim→CB→RB:rim→RW:lel→centershoot | 期待:RB→CB→RB→RW | 実際:RB→CB→RB→RW→CB
+  LW:awl→P→RW→LW:aws→P→centershoot | 期待:LW→P→RW→LW→P | 実際:LW→P→RW→LW→P→CB
+  LW:ril→P:ris→LW:ris→CB→cornershoot | 期待:LW→P→LW→CB | 実際:LW→P→LW→CB
+
+============================================================
+修正優先度（発生数順）
+============================================================
+       7件 | dribble_distance_mismatch | 不明
+       4件 | dribble_pass_to_mismatch | 不明
+       3件 | dribble_next_action_mismatch | 不明
