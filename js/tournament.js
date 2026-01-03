@@ -55,10 +55,8 @@ export function processRoundResults() {
 }
 
 // Advance tournament after player wins
+// P68: ラウンドインクリメントはrecordMatchResultで行うため、ここでは行わない
 export function advanceTournament() {
-    // Increment round
-    gameState.tournament.currentRound++;
-
     // Update all remaining teams' stats for next round
     const activeTeams = getActiveTeams(gameState.tournament.bracket);
     activeTeams.forEach(team => {

@@ -1,7 +1,7 @@
 // screens.js - UI Screen Management
 
 import { CONFIG } from './config.js';
-import { gameState, initializeNewGame, saveGame, loadGame, hasSaveData, advanceDay, recordMatchResult, setCurrentMatch, clearCurrentMatch, isBoycottActive, changeCaptainPersonality, applyBoycottRestPenalty, saveLastTactics, getLastTactics, saveTacticsPreset, getTacticsPresets, getTacticsPreset, deleteTacticsPreset, simulateAllDaysTraining } from './gameState.js';
+import { gameState, initializeNewGame, saveGame, loadGame, hasSaveData, advanceDay, recordMatchResult, setCurrentMatch, clearCurrentMatch, isBoycottActive, changeCaptainPersonality, applyBoycottRestPenalty, saveLastTactics, getLastTactics, saveTacticsPreset, getTacticsPresets, getTacticsPreset, deleteTacticsPreset, simulateAllDaysTraining, getAbilityStatus, getAbilitiesByCategory } from './gameState.js';
 import { initializeTournament, getNextOpponent, getCurrentRoundName, getSimplifiedBracket, processRoundResults, advanceTournament } from './tournament.js';
 import { getAvailableMenus, previewTrainingGrowth, executeTraining, getCaptainInfo } from './training.js';
 import { MatchSimulator, createTactic, validateTactics } from './match.js';
@@ -392,6 +392,12 @@ function renderMainScreen(container) {
     }, 'btn btn-secondary');
     actionDiv.appendChild(tacticsBtn);
 
+    // Player abilities button (PowerPro style)
+    const abilitiesBtn = createButton('📊 選手能力', () => {
+        showPlayerAbilitiesModal();
+    }, 'btn btn-secondary');
+    actionDiv.appendChild(abilitiesBtn);
+
     // Reset button (add to action buttons for visibility)
     let resetClickCount = 0;
     let resetTimeout = null;
@@ -655,7 +661,15 @@ function renderTrainingScreen(container) {
                 // P51: alertを削除
                 advanceDay();
                 saveGame();
-                switchScreen(SCREENS.MAIN);
+
+                // Check for ability changes and show notification
+                if (result.abilityChange && (result.abilityChange.overcameWeakness || result.abilityChange.acquiredStrength)) {
+                    showAbilityChangeNotification(result.abilityChange, () => {
+                        switchScreen(SCREENS.MAIN);
+                    });
+                } else {
+                    switchScreen(SCREENS.MAIN);
+                }
             }
             // P51: 失敗時のalertも削除
         }, 'btn btn-primary btn-small');
@@ -1712,9 +1726,10 @@ function renderMatchScreen(container, data) {
                 if (result === 'win') {
                     // Player won!
                     console.log('Player won!');
+                    // P68: AI試合を先にシミュレート（ラウンドインクリメント前）
+                    processRoundResults();
                     const awakening = recordMatchResult(true, score.player, score.opponent);
                     saveGame();
-                    processRoundResults();
                     advanceTournament();
 
                     // Show ace awakening screen first, then result screen
@@ -2168,6 +2183,281 @@ function showTacticsPresetsManagementModal() {
         document.body.removeChild(overlay);
     }, 'btn btn-secondary');
     closeBtn.style.cssText = 'margin-top: 10px;';
+    modal.appendChild(closeBtn);
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Close on overlay click
+    overlay.onclick = (e) => {
+        if (e.target === overlay) {
+            document.body.removeChild(overlay);
+        }
+    };
+}
+
+// Show ability change notification (after training)
+function showAbilityChangeNotification(abilityChange, onClose) {
+    // Create notification overlay
+    const overlay = createElement('div', 'ability-notification-overlay');
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;';
+
+    const notification = createElement('div', 'ability-notification');
+    notification.style.cssText = 'background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #eee; padding: 25px; border-radius: 16px; max-width: 400px; width: 90%; text-align: center; border: 2px solid #ffd700; box-shadow: 0 0 30px rgba(255,215,0,0.3);';
+
+    if (abilityChange.overcameWeakness) {
+        const weakness = abilityChange.overcameWeakness;
+        notification.innerHTML = `
+            <div style="font-size: 48px; margin-bottom: 15px;">🎊</div>
+            <h2 style="margin: 0 0 10px 0; color: #4ecdc4;">弱点克服！</h2>
+            <div style="background: #333; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <div style="color: #ff6b6b; text-decoration: line-through; font-size: 14px; margin-bottom: 8px;">
+                    ❌ ${weakness.name}
+                </div>
+                ${weakness.misconception ? `
+                    <div style="border-top: 1px solid #555; padding-top: 10px; margin-top: 10px;">
+                        <div style="color: #888; font-size: 11px; margin-bottom: 5px;">思考が変わった！</div>
+                        <div style="color: #ff8888; font-size: 12px; text-decoration: line-through;">「${weakness.misconception.wrong}」</div>
+                        <div style="color: #88ff88; font-size: 14px; margin-top: 5px;">↓</div>
+                        <div style="color: #4ecdc4; font-size: 13px; font-weight: bold;">「${weakness.misconception.correct}」</div>
+                    </div>
+                ` : ''}
+            </div>
+            <div style="color: #888; font-size: 12px;">${weakness.categoryName}の弱点を克服</div>
+        `;
+    } else if (abilityChange.acquiredStrength) {
+        const strength = abilityChange.acquiredStrength;
+        notification.innerHTML = `
+            <div style="font-size: 48px; margin-bottom: 15px;">⭐</div>
+            <h2 style="margin: 0 0 10px 0; color: #ffd700;">強み獲得！</h2>
+            <div style="background: #333; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <div style="color: #4ecdc4; font-size: 18px; font-weight: bold;">
+                    ✨ ${strength.name}
+                </div>
+            </div>
+            <div style="color: #888; font-size: 12px;">${strength.categoryName}の強みを獲得</div>
+        `;
+    } else if (abilityChange.correctedMisconceptions) {
+        // P64: Show notification when all misconceptions in a category are corrected
+        const corrected = abilityChange.correctedMisconceptions;
+        notification.innerHTML = `
+            <div style="font-size: 48px; margin-bottom: 15px;">💡</div>
+            <h2 style="margin: 0 0 10px 0; color: #88ff88;">理解完了！</h2>
+            <div style="background: #333; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <div style="color: #ffd700; font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+                    ${corrected.categoryName}の全弱点を克服！
+                </div>
+                <div style="color: #aaa; font-size: 11px; text-align: left;">
+                    ${corrected.misconceptions.map(m =>
+                        `<div style="padding: 4px 0; border-bottom: 1px dashed #555;">
+                            <span style="color: #666; text-decoration: line-through;">${m.wrong}</span>
+                            → <span style="color: #88ff88;">${m.correct}</span>
+                        </div>`
+                    ).join('')}
+                </div>
+            </div>
+            <div style="color: #888; font-size: 12px;">全ての勘違いが正しい理解に！</div>
+        `;
+    }
+
+    // Auto-close after delay
+    const closeBtn = createButton('OK', () => {
+        document.body.removeChild(overlay);
+        if (onClose) onClose();
+    }, 'btn btn-primary');
+    closeBtn.style.cssText = 'margin-top: 15px; padding: 12px 40px; font-size: 16px;';
+    notification.appendChild(closeBtn);
+
+    overlay.appendChild(notification);
+    document.body.appendChild(overlay);
+
+    // Auto-close after 5 seconds
+    setTimeout(() => {
+        if (overlay.parentNode) {
+            document.body.removeChild(overlay);
+            if (onClose) onClose();
+        }
+    }, 5000);
+}
+
+// Show player abilities modal (PowerPro style)
+function showPlayerAbilitiesModal() {
+    const abilities = getAbilitiesByCategory();
+    const status = getAbilityStatus();
+
+    // Create modal overlay
+    const overlay = createElement('div', 'modal-overlay');
+    overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center;';
+
+    const modal = createElement('div', 'abilities-modal');
+    modal.style.cssText = 'background: #1a1a2e; color: #eee; padding: 20px; border-radius: 12px; max-width: 600px; width: 95%; max-height: 85%; overflow-y: auto; font-family: monospace;';
+
+    // Title with progress
+    const titleDiv = createElement('div', 'abilities-title');
+    titleDiv.style.cssText = 'text-align: center; margin-bottom: 15px; border-bottom: 2px solid #4a4a8a; padding-bottom: 10px;';
+    titleDiv.innerHTML = `
+        <h2 style="margin: 0; color: #ffd700;">📊 選手能力</h2>
+        <p style="margin: 5px 0; font-size: 14px; color: #aaa;">
+            弱点克服: ${status.overcomeWeaknesses}/${status.totalWeaknesses} |
+            強み獲得: ${status.acquiredStrengths}/${status.totalStrengths}
+        </p>
+    `;
+    modal.appendChild(titleDiv);
+
+    // Render each category
+    Object.entries(abilities).forEach(([categoryKey, category]) => {
+        const categoryDiv = createElement('div', 'ability-category');
+        categoryDiv.style.cssText = 'background: #252545; border-radius: 8px; padding: 12px; margin-bottom: 15px; border: 1px solid #4a4a8a;';
+
+        // Category header with icon and role (P61)
+        const categoryIcons = { wing: '🏃‍♂️', back: '💥', cb: '🧠', pv: '🧱' };
+        const headerDiv = createElement('div', 'category-header');
+        headerDiv.style.cssText = 'margin-bottom: 10px; border-bottom: 1px solid #4a4a8a; padding-bottom: 8px;';
+        headerDiv.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 18px; font-weight: bold; color: #ffd700;">${categoryIcons[categoryKey] || '⚡'} ${category.name}</span>
+                <span style="font-size: 12px; color: #888;">${category.positions.join(', ')}</span>
+            </div>
+            <div style="font-size: 11px; color: #aaa; margin-top: 4px;">役割: ${category.role}</div>
+        `;
+        categoryDiv.appendChild(headerDiv);
+
+        // Weaknesses section (P62: removed "赤特" label)
+        const weaknessDiv = createElement('div', 'weaknesses-section');
+        weaknessDiv.style.cssText = 'margin-bottom: 10px;';
+        weaknessDiv.innerHTML = '<div style="color: #ff6b6b; font-size: 12px; margin-bottom: 5px;">▼ 弱点</div>';
+
+        const weaknessList = createElement('div', 'weakness-list');
+        weaknessList.style.cssText = 'display: flex; flex-wrap: wrap; gap: 5px;';
+
+        category.weaknesses.forEach(weakness => {
+            const badge = createElement('span', 'weakness-badge');
+            if (weakness.overcome) {
+                // Overcome weakness - strikethrough
+                badge.style.cssText = 'background: #333; color: #666; padding: 4px 8px; border-radius: 4px; font-size: 12px; text-decoration: line-through;';
+                badge.textContent = weakness.name;
+            } else {
+                // Active weakness
+                badge.style.cssText = 'background: #8b0000; color: #ffaaaa; padding: 4px 8px; border-radius: 4px; font-size: 12px; border: 1px solid #ff6b6b;';
+                badge.textContent = `❌ ${weakness.name}`;
+            }
+            weaknessList.appendChild(badge);
+        });
+        weaknessDiv.appendChild(weaknessList);
+
+        // P63/P64: Misconceptions section (勘違い) - corrected status added in P64
+        if (category.misconceptions && category.misconceptions.length > 0) {
+            const misconceptionDiv = createElement('div', 'misconceptions-section');
+            misconceptionDiv.style.cssText = 'margin-top: 8px;';
+
+            // P64: Show different header based on correction status
+            const allCorrected = category.allWeaknessesOvercome;
+            if (allCorrected) {
+                misconceptionDiv.innerHTML = '<div style="color: #88ff88; font-size: 11px; margin-bottom: 5px;">✓ 理解完了</div>';
+            } else {
+                misconceptionDiv.innerHTML = '<div style="color: #ff9966; font-size: 11px; margin-bottom: 5px;">▼ 勘違い → 正しい思考</div>';
+            }
+
+            const misconceptionList = createElement('div', 'misconception-list');
+            misconceptionList.style.cssText = 'font-size: 11px;';
+
+            category.misconceptions.forEach(m => {
+                const item = createElement('div', 'misconception-item');
+                // P64: Different style for corrected vs uncorrected misconceptions
+                if (m.corrected) {
+                    // 改善済み: 勘違いをグレーアウト＆取り消し線、正しい思考を強調
+                    item.style.cssText = 'padding: 6px 8px; border-bottom: 1px dashed #3a5a3a; background: rgba(0,100,0,0.1); border-radius: 4px; margin-bottom: 4px;';
+                    item.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #555; text-decoration: line-through; font-size: 10px; opacity: 0.5;">${m.wrong}</span>
+                            <span style="color: #555; font-size: 10px;">→</span>
+                            <span style="color: #88ff88; font-weight: bold; font-size: 12px; background: rgba(0,255,0,0.1); padding: 2px 6px; border-radius: 3px;">✓ ${m.correct}</span>
+                        </div>
+                        <div style="font-size: 9px; color: #4a4; margin-top: 2px;">【現在の思考】</div>
+                    `;
+                } else {
+                    // 未改善: 勘違い（現在の状態）を強調、正しい思考をグレーアウト
+                    item.style.cssText = 'padding: 6px 8px; border-bottom: 1px dashed #5a3a3a; background: rgba(100,0,0,0.1); border-radius: 4px; margin-bottom: 4px;';
+                    item.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #ff6666; font-weight: bold; font-size: 12px; background: rgba(255,0,0,0.15); padding: 2px 6px; border-radius: 3px;">✗ ${m.wrong}</span>
+                            <span style="color: #555; font-size: 10px;">→</span>
+                            <span style="color: #555; font-size: 10px; opacity: 0.5;">${m.correct}</span>
+                        </div>
+                        <div style="font-size: 9px; color: #a44; margin-top: 2px;">【現在の思考】← 改善が必要</div>
+                    `;
+                }
+                misconceptionList.appendChild(item);
+            });
+
+            misconceptionDiv.appendChild(misconceptionList);
+            weaknessDiv.appendChild(misconceptionDiv);
+        }
+
+        categoryDiv.appendChild(weaknessDiv);
+
+        // Strengths section (P62: removed "青特" label, P65: requires Ace awakening)
+        const strengthDiv = createElement('div', 'strengths-section');
+        // P65: Show ace requirement hint
+        const aceHint = category.hasAce ? (category.hasGearSecond ? ' 🔥' : ' ⭐') : '';
+        strengthDiv.innerHTML = `<div style="color: #4ecdc4; font-size: 12px; margin-bottom: 5px;">▼ 強み${aceHint}${!category.hasAce ? ' <span style="font-size: 10px; color: #888;">(エース覚醒で有効化)</span>' : ''}</div>`;
+
+        const strengthList = createElement('div', 'strength-list');
+        strengthList.style.cssText = 'display: flex; flex-wrap: wrap; gap: 5px;';
+
+        category.strengths.forEach(strength => {
+            const badge = createElement('span', 'strength-badge');
+            // P65: Symbol based on gear second status
+            const symbol = strength.gearSecond ? '◎' : '○';
+
+            if (strength.active) {
+                // P65: Active strength (acquired + ace)
+                if (strength.gearSecond) {
+                    // Gear Second: golden glow
+                    badge.style.cssText = 'background: linear-gradient(135deg, #664400 0%, #886600 100%); color: #ffdd00; padding: 4px 8px; border-radius: 4px; font-size: 12px; border: 2px solid #ffaa00; box-shadow: 0 0 8px rgba(255,170,0,0.5);';
+                    badge.textContent = `🔥 ◎${strength.name}`;
+                } else {
+                    // Normal Ace
+                    badge.style.cssText = 'background: #006666; color: #aaffff; padding: 4px 8px; border-radius: 4px; font-size: 12px; border: 1px solid #4ecdc4;';
+                    badge.textContent = `✨ ○${strength.name}`;
+                }
+            } else if (strength.acquired) {
+                // P65: Acquired but not active (no ace yet)
+                badge.style.cssText = 'background: #333; color: #668888; padding: 4px 8px; border-radius: 4px; font-size: 12px; border: 1px solid #446666;';
+                badge.textContent = `💤 ${symbol}${strength.name}`;
+                badge.title = 'エース覚醒で有効化';
+            } else {
+                // Not yet acquired
+                badge.style.cssText = 'background: #333; color: #666; padding: 4px 8px; border-radius: 4px; font-size: 12px; border: 1px dashed #555;';
+                badge.textContent = `${symbol} ${strength.name}`;
+            }
+            strengthList.appendChild(badge);
+        });
+        strengthDiv.appendChild(strengthList);
+        categoryDiv.appendChild(strengthDiv);
+
+        modal.appendChild(categoryDiv);
+    });
+
+    // Training progress info
+    const progressDiv = createElement('div', 'training-progress');
+    progressDiv.style.cssText = 'background: #1a1a2e; border: 1px solid #4a4a8a; border-radius: 8px; padding: 10px; margin-bottom: 15px;';
+    progressDiv.innerHTML = `
+        <div style="font-size: 12px; color: #888; margin-bottom: 8px;">練習進捗カウンター（2回で1変化）</div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 11px;">
+            <span style="color: #aaa;">判断系: ${status.progress.judgment}/2</span>
+            <span style="color: #aaa;">動作系: ${status.progress.movement}/2</span>
+            <span style="color: #aaa;">シュート系: ${status.progress.shooting}/2</span>
+            <span style="color: #aaa;">汎用: ${status.progress.general}/2</span>
+        </div>
+    `;
+    modal.appendChild(progressDiv);
+
+    // Close button
+    const closeBtn = createButton('閉じる', () => {
+        document.body.removeChild(overlay);
+    }, 'btn btn-primary');
+    closeBtn.style.cssText = 'width: 100%; padding: 12px; font-size: 16px;';
     modal.appendChild(closeBtn);
 
     overlay.appendChild(modal);

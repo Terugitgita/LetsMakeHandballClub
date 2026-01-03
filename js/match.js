@@ -505,7 +505,11 @@ export class MatchSimulator {
         } else if (action.type === 'pass') {
             // Wait for ball animation to complete
             if (!this.ballAnimating && action.started) {
-                this.finishAction();
+                // P55: インターセプトされた場合はfinishAction()を呼ばない
+                // pendingTakeoverがtrueの場合、resume()後にhandleOpponentTakeoverが呼ばれる
+                if (!this.pendingTakeover) {
+                    this.finishAction();
+                }
             } else if (!action.started) {
                 action.started = true;
                 this.executePass(action.data.to);

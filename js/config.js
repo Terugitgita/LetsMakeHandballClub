@@ -25,7 +25,9 @@ export const FINAL_BOSS = {
     }
 };
 
+// P68: 64チームに対応するため、主要都市の第2代表を追加
 export const PREFECTURES = [
+    // 47都道府県
     "北海道", "青森", "岩手", "宮城", "秋田", "山形", "福島",
     "茨城", "栃木", "群馬", "埼玉", "千葉", "東京", "神奈川",
     "新潟", "富山", "石川", "福井", "山梨", "長野", "岐阜",
@@ -33,6 +35,10 @@ export const PREFECTURES = [
     "奈良", "和歌山", "鳥取", "島根", "岡山", "広島", "山口",
     "徳島", "香川", "愛媛", "高知", "福岡", "佐賀", "長崎",
     "熊本", "大分", "宮崎", "鹿児島", "沖縄",
+    // 第2代表（主要都市）- 16チーム追加で合計64チーム
+    "東京B", "大阪B", "神奈川B", "愛知B", "埼玉B", "千葉B", "兵庫B", "北海道B",
+    "福岡B", "静岡B", "茨城B", "広島B", "京都B", "宮城B", "新潟B", "長野B",
+    // ラスボス
     "K航拿"
 ];
 
@@ -42,8 +48,10 @@ export const GAME_CONFIG = {
     MAX_ATTEMPTS: 10,
     PLAYERS_PER_TEAM: 7,
     FPS: 30,
-    TOTAL_TEAMS: 48,
-    SEEDED_TEAMS: 16,
+    // P68: 64チームに変更（2^6 = 64 で6ラウンドのバイナリブラケットが正しく機能）
+    // 旧: 48チームは2の累乗ではなく、ラウンド計算が不正確だった
+    TOTAL_TEAMS: 64,
+    SEEDED_TEAMS: 0,  // 全チーム1回戦から参加（シード廃止）
     TOTAL_WEEKS: 6,
     COURT_WIDTH: 100,  // 20m in game units (1 unit = 0.2m)
     COURT_HEIGHT: 100, // 20m half-court (1 unit = 0.2m)
@@ -64,7 +72,16 @@ export const INITIAL_STATS = {
 
 export const ACE_SYSTEM = {
     INITIAL_COUNT: 0,
-    INCREMENT_PER_ROUND: 2,  // 1試合ごとに2人覚醒
+    // ラウンドごとの覚醒数 (1回戦:1, 2回戦:1, 3回戦:2, 準々決勝:2, 準決勝:0=ギアセカンド)
+    INCREMENT_BY_ROUND: {
+        1: 1,  // 1回戦勝利後
+        2: 1,  // 2回戦勝利後
+        3: 2,  // 3回戦勝利後
+        4: 2,  // 準々決勝勝利後
+        5: 0,  // 準決勝勝利後はエースではなくギアセカンド
+        6: 0   // 決勝後（ゲーム終了）
+    },
+    GEAR_SECOND_ON_SEMIFINAL: 2,  // 準決勝勝利後にギアセカンド覚醒する人数
     STAT_MULTIPLIER: 1.5,
     SIZE_MULTIPLIER: 1.5,
     RANDOM_POSITION: true,
@@ -324,6 +341,11 @@ export const PREFECTURE_TO_REGION = {
     "福岡": "九州", "佐賀": "九州", "長崎": "九州",
     "熊本": "九州", "大分": "九州", "宮崎": "九州",
     "鹿児島": "九州", "沖縄": "九州",
+    // P68: 第2代表チームの地域マッピング
+    "東京B": "関東", "大阪B": "近畿", "神奈川B": "関東", "愛知B": "中部",
+    "埼玉B": "関東", "千葉B": "関東", "兵庫B": "近畿", "北海道B": "北海道",
+    "福岡B": "九州", "静岡B": "中部", "茨城B": "関東", "広島B": "中国",
+    "京都B": "近畿", "宮城B": "東北", "新潟B": "中部", "長野B": "中部",
     "K航拿": "K航拿"
 };
 
@@ -446,7 +468,114 @@ export const TEAM_NAME_FORMAT = {
     }
 };
 
-// 10. Debug Settings
+// 10. Position Ability System (PowerPro Style)
+export const POSITION_ABILITIES = {
+    // 4つのカテゴリ（ウイング、バック、CB、PV）
+    categories: {
+        wing: {
+            name: "ウイング",
+            positions: ["LW", "RW"],
+            role: "サイドで幅を作る・速攻のフィニッシャー",
+            weaknesses: [
+                { id: "unstable_posture", name: "体勢不安定", type: "movement" },
+                { id: "weak_1on1_defense", name: "守備1on1不足", type: "general" },
+                { id: "inconsistent_scoring", name: "決定率の波", type: "shooting" }
+            ],
+            strengths: [
+                { id: "fast_break", name: "速攻○" },
+                { id: "narrow_angle_scoring", name: "狭角からの得点力" }
+            ],
+            misconceptions: [
+                { wrong: "点を取れれば仕事は終わり", correct: "点＋幅＋速攻参加が役割" },
+                { wrong: "ボールを待つポジション", correct: "スペースを作るのが仕事" },
+                { wrong: "角度がなければ無理", correct: "体勢とコースは自分で作る" },
+                { wrong: "守備はバックの仕事", correct: "最初のプレッシャーは自分" }
+            ]
+        },
+        back: {
+            name: "バック",
+            positions: ["LB", "RB"],
+            role: "得点圧で守備を下げる",
+            weaknesses: [
+                { id: "accuracy_variance", name: "精度ムラ", type: "shooting" },
+                { id: "slow_release", name: "リリース遅れ", type: "shooting" },
+                { id: "slow_return", name: "戻り遅い", type: "general" }
+            ],
+            strengths: [
+                { id: "lower_defense_from_middle", name: "ミドルから守備を下げられる" }
+            ],
+            misconceptions: [
+                { wrong: "強く投げれば入る", correct: "「速さ」より「早さと精度」" },
+                { wrong: "打てるなら全部打つ", correct: "打つことで味方を楽にする" },
+                { wrong: "当たられるのは仕方ない", correct: "当たられない位置取りがある" },
+                { wrong: "攻撃だけが評価", correct: "戻りと守備で信頼を得る" }
+            ]
+        },
+        cb: {
+            name: "センターバック",
+            positions: ["CB"],
+            role: "攻撃の設計・判断の中心",
+            weaknesses: [
+                { id: "slow_decision", name: "判断遅れ", type: "judgment" },
+                { id: "passive", name: "消極性", type: "judgment" },
+                { id: "poor_center_control", name: "中央管理不足", type: "judgment" }
+            ],
+            strengths: [
+                { id: "support_teammates_control_flow", name: "味方を活かし流れを支配" }
+            ],
+            misconceptions: [
+                { wrong: "自分が一番判断できる", correct: "最善は「チームの選択」" },
+                { wrong: "指示＝声を出すこと", correct: "動きで伝えるのも指示" },
+                { wrong: "自分が点を取らないと", correct: "点を取らせる方が価値が高い" },
+                { wrong: "ミスは仕方ない", correct: "ミスの種類を選ぶ" }
+            ]
+        },
+        pv: {
+            name: "ピヴォット",
+            positions: ["PV", "P"],
+            role: "中央で守備を崩す起点",
+            weaknesses: [
+                { id: "limited_range", name: "可動域狭い", type: "movement" },
+                { id: "one_side_dependent", name: "片側依存", type: "movement" }
+            ],
+            strengths: [
+                { id: "attract_defense", name: "守備を引き付ける存在" }
+            ],
+            misconceptions: [
+                { wrong: "点を取れば評価される", correct: "引き付けるだけで仕事成立" },
+                { wrong: "動かない方が楽", correct: "動くほど味方が楽になる" },
+                { wrong: "パスは来るもの", correct: "来る位置に入り直す" },
+                { wrong: "押されるのは仕方ない", correct: "体の向きで勝負は変わる" }
+            ]
+        }
+    },
+    // 練習と弱点タイプの対応（Q9回答）
+    trainingMapping: {
+        "パス練習": ["judgment"],      // 判断系（判断遅れ、消極性、中央管理不足）
+        "ドリブル練習": ["movement"],  // 動作系（体勢不安定、可動域狭い、片側依存）
+        "シュート練習": ["shooting"],  // シュート系（決定率の波、精度ムラ、リリース遅れ）
+        "総合練習": ["judgment", "movement", "shooting", "general"]  // 全カテゴリ
+    },
+    // 弱点克服・強み獲得のペース
+    // P69: 決勝前に全て克服できるよう調整（25練習で16変化 = 1.56練習/変化）
+    progressConfig: {
+        practicePerChange: 1.5,  // 1.5練習で1つ変化（3練習で2変化）
+        totalWeaknesses: 11,     // 弱点の合計数
+        totalStrengths: 5        // 強みの合計数
+    },
+    // P69: エース覚醒システム
+    aceAwakeningConfig: {
+        // 準決勝前（ラウンド1-4）に覚醒可能なポジション（GK除く）
+        positions: ["LW", "LB", "CB", "RB", "RW", "P"],
+        // 練習ごとの覚醒確率（準決勝前に全員覚醒するよう調整）
+        // 20練習で6人覚醒 = 30%確率
+        awakeningChance: 0.30,
+        // 準決勝勝利後にギアセカンドになる人数
+        gearSecondCount: 2
+    }
+};
+
+// 11. Debug Settings
 export const DEBUG_CONFIG = {
     ENABLED: true,  // デバッグモード有効化
     SHOW_FPS: false,
@@ -501,5 +630,6 @@ export const CONFIG = {
     MESSAGES,
     TEAM_NAME_FORMAT,
     DEBUG: DEBUG_CONFIG,
-    BACKGROUND: BACKGROUND_CONFIG
+    BACKGROUND: BACKGROUND_CONFIG,
+    ABILITIES: POSITION_ABILITIES
 };

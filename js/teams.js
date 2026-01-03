@@ -78,55 +78,52 @@ export function generateOpponent(prefecture, round) {
     };
 }
 
-// Create initial tournament bracket (48 teams)
+// P68: Create initial tournament bracket (64 teams, シード廃止)
 export function createInitialBracket() {
     let teams = generateAllTeams();
 
-    // Ensure K航拿 (てぇでぇ's学園) is in seeded position
+    // K航拿 (てぇでぇ's学園) をブラケット前半（ID=0）に配置
     const finalBossIndex = teams.findIndex(t => t.prefecture === "K航拿");
     if (finalBossIndex > 0) {
-        // Swap with first seeded team
         [teams[0], teams[finalBossIndex]] = [teams[finalBossIndex], teams[0]];
         teams[0].id = 0;
         teams[finalBossIndex].id = finalBossIndex;
     }
 
-    // Ensure 奈良 (player team) is NOT seeded
+    // 奈良（プレーヤーチーム）を抽出
     const naraIndex = teams.findIndex(t => t.prefecture === "奈良");
-    if (naraIndex < CONFIG.GAME.SEEDED_TEAMS) {
-        // Swap with first non-seeded team
-        const swapIndex = CONFIG.GAME.SEEDED_TEAMS;
-        [teams[naraIndex], teams[swapIndex]] = [teams[swapIndex], teams[naraIndex]];
-        teams[naraIndex].id = naraIndex;
-        teams[swapIndex].id = swapIndex;
-        teams[swapIndex].isSeeded = false;
-        teams[naraIndex].isSeeded = true;
-    }
-
-    // Shuffle non-seeded teams (except player team)
-    const seededTeams = teams.slice(0, CONFIG.GAME.SEEDED_TEAMS);
-    let nonSeededTeams = teams.slice(CONFIG.GAME.SEEDED_TEAMS);
-
-    // Find player team in non-seeded
-    const playerIndex = nonSeededTeams.findIndex(t => t.prefecture === "奈良");
     let playerTeam = null;
-    if (playerIndex >= 0) {
-        playerTeam = nonSeededTeams.splice(playerIndex, 1)[0];
+    if (naraIndex >= 0) {
+        playerTeam = teams.splice(naraIndex, 1)[0];
     }
 
-    // Shuffle remaining non-seeded teams
-    nonSeededTeams = shuffle(nonSeededTeams);
+    // K航拿を抽出（ID=0を維持）
+    const bossTeam = teams.splice(0, 1)[0];
 
-    // Add player team back at random position
+    // 残りのチームをシャッフル
+    teams = shuffle(teams);
+
+    // ブラケット構築:
+    // - K航拿をID=0（前半ブラケットの先頭）
+    // - プレーヤーをブラケット後半（ID >= 32）に配置
+    // これにより決勝まで対戦しない
+    const halfPoint = Math.floor(CONFIG.GAME.TOTAL_TEAMS / 2);  // 32
+
+    // 前半ブラケット: K航拿 + 他チーム31個
+    const firstHalf = [bossTeam, ...teams.slice(0, halfPoint - 1)];
+
+    // 後半ブラケット: 他チーム + プレーヤー
+    let secondHalf = teams.slice(halfPoint - 1);
     if (playerTeam) {
-        const insertPos = Math.floor(Math.random() * (nonSeededTeams.length + 1));
-        nonSeededTeams.splice(insertPos, 0, playerTeam);
+        // プレーヤーを後半のランダムな位置に挿入
+        const insertPos = Math.floor(Math.random() * (secondHalf.length + 1));
+        secondHalf.splice(insertPos, 0, playerTeam);
     }
 
-    // Combine back
-    const finalBracket = [...seededTeams, ...nonSeededTeams];
+    // 結合
+    const finalBracket = [...firstHalf, ...secondHalf];
 
-    // Update IDs
+    // IDを更新
     finalBracket.forEach((team, index) => {
         team.id = index;
     });
@@ -206,30 +203,38 @@ export function simulateAIMatch(team1, team2) {
 }
 
 // Simulate all AI matches in a round
+// P68: ブラケット構造を尊重してマッチをペアリング
 export function simulateRoundMatches(bracket, round, playerTeamId) {
     const results = [];
-    const teamsPerMatch = Math.pow(2, round);
-    const totalMatches = CONFIG.GAME.TOTAL_TEAMS / teamsPerMatch / 2;
+    const windowSize = Math.pow(2, round);  // Round 1: 2, Round 2: 4, Round 3: 8, etc.
+    const numWindows = CONFIG.GAME.TOTAL_TEAMS / windowSize;
 
-    // Group teams into matches
-    const activeTeams = bracket.filter(t => !t.eliminated);
-    const matches = [];
+    // Process each window in the bracket
+    for (let w = 0; w < numWindows; w++) {
+        const windowStart = w * windowSize;
+        const windowEnd = windowStart + windowSize;
 
-    for (let i = 0; i < activeTeams.length; i += 2) {
-        if (i + 1 < activeTeams.length) {
-            matches.push([activeTeams[i], activeTeams[i + 1]]);
+        // Find the two non-eliminated teams in this window
+        const teamsInWindow = [];
+        for (let i = windowStart; i < windowEnd; i++) {
+            if (bracket[i] && !bracket[i].eliminated) {
+                teamsInWindow.push(bracket[i]);
+            }
+        }
+
+        // If exactly 2 teams remain in this window, they fight
+        if (teamsInWindow.length === 2) {
+            const [team1, team2] = teamsInWindow;
+
+            // Skip player match
+            if (team1.id === playerTeamId || team2.id === playerTeamId) {
+                continue;
+            }
+
+            const result = simulateAIMatch(team1, team2);
+            results.push(result);
         }
     }
-
-    // Simulate each match (skip player match)
-    matches.forEach(([team1, team2]) => {
-        if (team1.id === playerTeamId || team2.id === playerTeamId) {
-            return; // Skip player match
-        }
-
-        const result = simulateAIMatch(team1, team2);
-        results.push(result);
-    });
 
     return results;
 }

@@ -200,20 +200,26 @@ export function executeTraining(menuName) {
     }
 
     // Apply training
-    const success = applyTraining(menuName);
+    const result = applyTraining(menuName);
+
+    // Handle both old boolean return and new object return
+    const success = result === true || (result && result.success);
+    const abilityChange = result && result.abilityChange ? result.abilityChange : null;
 
     if (success) {
         if (menuName === "休養") {
             return {
                 success: true,
                 message: CONFIG.MESSAGES.TRAINING.restBonus,
-                stats: gameState.team.stats
+                stats: gameState.team.stats,
+                abilityChange: null
             };
         } else {
             return {
                 success: true,
                 message: CONFIG.MESSAGES.TRAINING.growth,
-                stats: gameState.team.stats
+                stats: gameState.team.stats,
+                abilityChange: abilityChange
             };
         }
     }
