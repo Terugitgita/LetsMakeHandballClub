@@ -6,12 +6,53 @@ export class AudioManager {
     constructor() {
         this.sounds = {};
         this.bgm = null;
+        this.currentBGMKey = null;  // 現在再生中のBGMキー
         this.bgmVolume = 0.3;
         this.seVolume = 0.5;
         this.muted = false;
         this.initialized = false;
         this.suteePlayed = false;
         this.loadingPromise = null;
+        this.audioUnlocked = false;  // iOS用：音声許可フラグ
+
+        // iOS対応: ユーザーインタラクションで音声を有効化
+        this.setupIOSAudioUnlock();
+    }
+
+    // iOS対応: 最初のタップで音声を有効化
+    setupIOSAudioUnlock() {
+        const unlockAudio = () => {
+            if (this.audioUnlocked) return;
+
+            // 無音のAudioContextを作成して再生許可を取得
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const buffer = audioContext.createBuffer(1, 1, 22050);
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            source.start(0);
+
+            // 既存の音声も一度再生を試みる
+            Object.values(this.sounds).forEach(audio => {
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }).catch(() => {});
+            });
+
+            this.audioUnlocked = true;
+            console.log('iOS audio unlocked');
+
+            // イベントリスナーを削除
+            document.removeEventListener('touchstart', unlockAudio);
+            document.removeEventListener('touchend', unlockAudio);
+            document.removeEventListener('click', unlockAudio);
+        };
+
+        // タッチとクリックの両方に対応
+        document.addEventListener('touchstart', unlockAudio, { once: false });
+        document.addEventListener('touchend', unlockAudio, { once: false });
+        document.addEventListener('click', unlockAudio, { once: false });
     }
 
     // 音声ファイルを遅延ロード（バックグラウンドで）
@@ -71,12 +112,18 @@ export class AudioManager {
     playBGM(soundKey, loop = true) {
         if (this.muted) return;
 
+        // 同じBGMが既に再生中ならスキップ（画面遷移でリセットしない）
+        if (this.currentBGMKey === soundKey && this.bgm && !this.bgm.paused) {
+            return;
+        }
+
         // 現在のBGMを停止
         this.stopBGM();
 
         const sound = this.sounds[soundKey];
         if (sound) {
             this.bgm = sound;
+            this.currentBGMKey = soundKey;
             this.bgm.loop = loop;
             this.bgm.volume = this.bgmVolume;
             this.bgm.play().catch(() => {});
@@ -89,6 +136,7 @@ export class AudioManager {
             this.bgm.pause();
             this.bgm.currentTime = 0;
             this.bgm = null;
+            this.currentBGMKey = null;
         }
     }
 

@@ -152,12 +152,29 @@ p {
     font-size: 2.5rem;
     margin-bottom: 10px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+    border-radius: 8px;
 }
 
 .game-subtitle {
     font-size: 1.2rem;
     margin-bottom: 40px;
-    opacity: 0.9;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 8px 16px;
+    border-radius: 6px;
+}
+
+.subtitle-highlight {
+    color: #ff4444;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.8), 0 0 20px rgba(255, 68, 68, 0.5);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { text-shadow: 0 0 10px rgba(255, 68, 68, 0.8), 0 0 20px rgba(255, 68, 68, 0.5); }
+    50% { text-shadow: 0 0 20px rgba(255, 68, 68, 1), 0 0 40px rgba(255, 68, 68, 0.8); }
 }
 
 /* ===== MAIN SCREEN ===== */
@@ -285,6 +302,115 @@ p {
     margin-bottom: 20px;
 }
 
+.stats-row {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.stat-item {
+    background: #f0f8ff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* Training Menu Table */
+.training-menu-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.training-menu-table th,
+.training-menu-table td {
+    padding: 10px 8px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.training-menu-table th {
+    background: #0066cc;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.training-menu-table .menu-col {
+    text-align: left;
+    width: 35%;
+}
+
+.training-menu-table .stat-col {
+    width: 13%;
+}
+
+.training-menu-table .action-col {
+    width: 26%;
+}
+
+.fill-all-growth {
+    display: none;
+    color: #ff6600;
+    font-weight: bold;
+    margin-top: 4px;
+    text-align: center;
+}
+
+.training-menu-row:hover {
+    background: #f5f5ff;
+}
+
+.training-menu-row:last-child td {
+    border-bottom: none;
+}
+
+.menu-cell {
+    text-align: left !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.menu-icon {
+    font-size: 1.3rem;
+}
+
+.menu-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.stat-cell {
+    font-weight: bold;
+    color: #666;
+}
+
+.stat-cell.stat-up {
+    color: #00cc66;
+}
+
+.action-cell {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-small {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    min-width: auto;
+}
+
+/* Legacy styles (kept for compatibility) */
 .training-menu-container {
     display: flex;
     flex-direction: column;
@@ -350,6 +476,89 @@ p {
     color: #cc0000;
 }
 
+/* P46: コンパクトな対戦相手情報 */
+.opponent-info-compact {
+    background: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+}
+
+.opponent-name-row {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.region-tactic {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.attempts-row {
+    font-size: 0.85rem;
+    color: #cc0000;
+    text-align: center;
+}
+
+/* P46: 能力値比較テーブル */
+.stats-comparison-table {
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.stats-comparison-table th,
+.stats-comparison-table td {
+    padding: 6px 8px;
+    text-align: center;
+}
+
+.stats-comparison-table th {
+    background: #0066cc;
+    color: white;
+    font-weight: bold;
+}
+
+.stats-comparison-table th:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+.stats-comparison-table th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+.stats-comparison-table .team-label {
+    background: #f0f0f0;
+    font-weight: bold;
+    text-align: left;
+    padding-left: 10px;
+    color: #333;
+}
+
+.stats-comparison-table .player-stat {
+    color: #0066cc;
+    font-weight: bold;
+}
+
+.stats-comparison-table .opponent-stat {
+    color: #cc0000;
+    font-weight: bold;
+}
+
+.stats-comparison-table tbody tr:last-child td:first-child {
+    border-radius: 0 0 0 8px;
+}
+
+.stats-comparison-table tbody tr:last-child td:last-child {
+    border-radius: 0 0 8px 0;
+}
+
 .opponent-stats {
     margin-top: 10px;
     padding: 10px;
@@ -401,6 +610,7 @@ p {
     background: #ffe0e0;
     border-left: 3px solid #cc0000;
     font-weight: bold;
+    color: #333;
     animation: failed-pulse 1.5s ease-in-out infinite;
 }
 
@@ -462,14 +672,10 @@ p {
 }
 
 .attempts-remaining {
-    margin-top: 15px;
-    padding: 12px;
-    background: #fff3cd;
-    border: 2px solid #ffc107;
-    border-radius: 8px;
+    margin-top: 10px;
     text-align: center;
-    font-size: 1.1rem;
-    color: #856404;
+    font-size: 1rem;
+    color: #cc0000;
 }
 
 .save-load-buttons {
@@ -663,6 +869,37 @@ p {
     max-width: 400px;
 }
 
+/* P48: インターセプト表示改善 */
+.intercept-main-message {
+    color: #ffffff;
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.revive-header {
+    color: #ffeb3b;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-shadow: 0 0 15px rgba(255, 235, 59, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: revive-pulse 1s ease-in-out infinite;
+}
+
+.remaining-attempts {
+    color: #ff6b6b;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes revive-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
 .interception-text {
     color: #ffffff;
     font-size: 1.3rem;
@@ -716,7 +953,7 @@ p {
 }
 
 .final-score {
-    background: white;
+    background: rgba(255, 255, 255, 0.5);
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -726,17 +963,28 @@ p {
 
 .final-score h3 {
     font-size: 1.5rem;
-    color: #333;
+    color: #000;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+/* 勝利時のスコアボックス */
+.final-score.score-win {
+    background: rgba(144, 238, 144, 0.5);  /* 半透明緑 */
+}
+
+/* 敗北時のスコアボックス */
+.final-score.score-lose {
+    background: rgba(255, 160, 160, 0.5);  /* 半透明赤 */
 }
 
 .senryu-container {
-    background: linear-gradient(135deg, #fff9e6 0%, #ffe6cc 100%);
+    background: linear-gradient(135deg, rgba(255, 249, 230, 0.5) 0%, rgba(255, 230, 204, 0.5) 100%);
     padding: 20px 30px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     margin-bottom: 30px;
     min-width: 300px;
-    border: 2px solid #cc9966;
+    border: 2px solid rgba(204, 153, 102, 0.7);
 }
 
 .senryu-title {
@@ -745,6 +993,7 @@ p {
     font-weight: bold;
     margin-bottom: 10px;
     text-align: center;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .senryu-text {
@@ -754,6 +1003,7 @@ p {
     text-align: center;
     font-weight: 500;
     letter-spacing: 0.05em;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .senryu-loading, .senryu-error {
@@ -1056,17 +1306,22 @@ p {
 }
 
 /* ===== MATCH ACTION ICON ===== */
+/* P51: アクション表記をテキスト表示に変更 */
 .match-action-icon {
     position: fixed;
     top: 10px;
     right: 10px;
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: bold;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     z-index: 500;
     animation: iconPulse 1s ease-in-out infinite;
+    text-align: center;
+    min-width: 80px;
 }
 
 @keyframes iconPulse {
@@ -1076,4 +1331,33 @@ p {
     50% {
         transform: scale(1.05);
     }
+}
+
+/* ===== TACTICS PRESET CONTROLS ===== */
+.preset-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.preset-controls .btn {
+    flex: 1;
+    min-width: 80px;
+    font-size: 14px;
+    padding: 8px 12px;
+}
+
+.btn-small {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
 }

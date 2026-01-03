@@ -9,23 +9,30 @@ echo.
 echo  Starting game...
 echo.
 
-python --version >nul 2>&1
+node --version >nul 2>&1
 if %errorlevel% == 0 (
-    echo  [OK] Python is ready!
+    echo  [OK] Node.js is ready!
     echo.
-    timeout /t 2 /nobreak >nul
-    start http://localhost:8000
-    echo  [OK] Browser opened!
+    echo  Starting server on port 8080...
     echo.
-    echo  Server is running...
-    echo  Press Ctrl+C to stop
+    echo  Opening browser in 3 seconds...
+
+    REM Start browser after delay
+    start /B cmd /c "timeout /t 3 /nobreak >nul && start http://localhost:8080"
+
     echo.
-    python -m http.server 8000
+    echo  ====================================
+    echo   Press Ctrl+C to stop the server
+    echo  ====================================
+    echo.
+
+    REM Start server (blocks until Ctrl+C)
+    npx --yes serve -l 8080
 ) else (
     color 0C
-    echo  [X] Python not found
+    echo  [X] Node.js not found
     echo.
-    echo  Install from: python.org
+    echo  Install from: nodejs.org
     echo.
     pause
 )

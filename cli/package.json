@@ -1,0 +1,30 @@
+{
+  "name": "handball-cli-tests",
+  "version": "1.0.0",
+  "description": "CLI Test Suite for ズッキュン中学物語",
+  "type": "module",
+  "main": "run-tests.js",
+  "scripts": {
+    "test": "node run-tests.js",
+    "test:verbose": "node run-tests.js --verbose",
+    "test:training": "node run-tests.js --category=TR",
+    "test:match": "node run-tests.js --category=MT",
+    "test:tournament": "node run-tests.js --category=TN",
+    "test:ace": "node run-tests.js --category=AC",
+    "test:special": "node run-tests.js --category=SP",
+    "test:rest": "node run-tests.js --category=RS",
+    "test:regional": "node run-tests.js --category=RT",
+    "test:success": "node run-tests.js --category=SR",
+    "test:save": "node run-tests.js --category=SL",
+    "test:bug": "node run-tests.js --category=BUG",
+    "pdca": "node pdca-cli.js"
+  },
+  "keywords": [
+    "handball",
+    "game",
+    "testing",
+    "cli"
+  ],
+  "author": "Claude Code",
+  "license": "MIT"
+}

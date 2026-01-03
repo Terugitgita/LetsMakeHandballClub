@@ -1,7 +1,7 @@
 // screens.js - UI Screen Management
 
 import { CONFIG } from './config.js';
-import { gameState, initializeNewGame, saveGame, loadGame, hasSaveData, advanceDay, recordMatchResult, setCurrentMatch, clearCurrentMatch, isBoycottActive, changeCaptainPersonality, applyBoycottRestPenalty, saveLastTactics, getLastTactics, saveTacticsPreset, getTacticsPresets, getTacticsPreset, deleteTacticsPreset } from './gameState.js';
+import { gameState, initializeNewGame, saveGame, loadGame, hasSaveData, advanceDay, recordMatchResult, setCurrentMatch, clearCurrentMatch, isBoycottActive, changeCaptainPersonality, applyBoycottRestPenalty, saveLastTactics, getLastTactics, saveTacticsPreset, getTacticsPresets, getTacticsPreset, deleteTacticsPreset, simulateAllDaysTraining } from './gameState.js';
 import { initializeTournament, getNextOpponent, getCurrentRoundName, getSimplifiedBracket, processRoundResults, advanceTournament } from './tournament.js';
 import { getAvailableMenus, previewTrainingGrowth, executeTraining, getCaptainInfo } from './training.js';
 import { MatchSimulator, createTactic, validateTactics } from './match.js';
@@ -255,7 +255,17 @@ function renderTitleScreen(container) {
     }
 
     const title = createElement('h1', 'game-title', CONFIG.MESSAGES.TITLE.gameTitle);
-    const subtitle = createElement('p', 'game-subtitle', CONFIG.MESSAGES.TITLE.subtitle);
+
+    // サブタイトルで「死に戻り」を強調表示
+    const subtitle = createElement('p', 'game-subtitle');
+    const subtitleText = CONFIG.MESSAGES.TITLE.subtitle;
+    const highlight = CONFIG.MESSAGES.TITLE.subtitleHighlight;
+    if (highlight && subtitleText.includes(highlight)) {
+        const parts = subtitleText.split(highlight);
+        subtitle.innerHTML = parts[0] + '<span class="subtitle-highlight">' + highlight + '</span>' + parts[1];
+    } else {
+        subtitle.textContent = subtitleText;
+    }
 
     titleDiv.appendChild(title);
     titleDiv.appendChild(subtitle);
@@ -642,13 +652,12 @@ function renderTrainingScreen(container) {
             audioManager.playSE('training_select');
             const result = executeTraining(menu.name);
             if (result.success) {
-                alert(result.message);
+                // P51: alertを削除
                 advanceDay();
                 saveGame();
                 switchScreen(SCREENS.MAIN);
-            } else {
-                alert(result.message);
             }
+            // P51: 失敗時のalertも削除
         }, 'btn btn-primary btn-small');
         actionCell.appendChild(selectBtn);
 
@@ -661,14 +670,27 @@ function renderTrainingScreen(container) {
                 fillClickCount++;
 
                 if (fillClickCount === 1) {
+                    // Calculate expected growth for all days
+                    const growth = simulateAllDaysTraining(menu.name, daysUntilMatch);
+                    const growthText = `P+${growth.pass} D+${growth.dribble} S+${growth.shoot}`;
                     fillAllBtn.textContent = `${daysUntilMatch}日`;
                     fillAllBtn.style.backgroundColor = '#ff9900';
-                    fillAllBtn.title = `残り${daysUntilMatch}日間「${menu.name}」を実行。もう一度押してください`;
+                    fillAllBtn.title = `残り${daysUntilMatch}日間「${menu.name}」を実行\n${growthText}\nもう一度押してください`;
+
+                    // Show growth info in a tooltip-style element
+                    let growthInfo = actionCell.querySelector('.fill-all-growth');
+                    if (!growthInfo) {
+                        growthInfo = createElement('div', 'fill-all-growth');
+                        actionCell.appendChild(growthInfo);
+                    }
+                    growthInfo.innerHTML = `<small>${growthText}</small>`;
+                    growthInfo.style.display = 'block';
 
                     fillTimeout = setTimeout(() => {
                         fillClickCount = 0;
                         fillAllBtn.textContent = '全日';
                         fillAllBtn.style.backgroundColor = '';
+                        if (growthInfo) growthInfo.style.display = 'none';
                     }, 4000);
                 } else if (fillClickCount >= 2) {
                     clearTimeout(fillTimeout);
@@ -725,48 +747,51 @@ function renderMatchSetupScreen(container, data) {
     const setupDiv = createElement('div', 'match-setup-screen');
 
     const header = createElement('h2', 'match-header', `${getCurrentRoundName()}`);
-    const opponentInfo = createElement('div', 'opponent-info');
-    opponentInfo.innerHTML = `
-        <h3>対戦相手: ${data.opponent.name}</h3>
-        <p>地方: ${data.opponent.region}</p>
-        <p>守備戦術: ${data.opponent.tactic.name}</p>
-        <p class="attempts-remaining"><strong>残りチャレンジ回数: ${gameState.currentMatch.attemptsRemaining} / ${CONFIG.GAME.MAX_ATTEMPTS}</strong></p>
-    `;
 
-    // Stats comparison
-    const statsComparison = createElement('div', 'stats-comparison');
+    // コンパクトなヘッダー情報（1行で地方と守備戦術）
+    const opponentInfo = createElement('div', 'opponent-info-compact');
     const playerStats = gameState.team.stats;
     const opponentStats = data.opponent.stats;
-    statsComparison.innerHTML = `
-        <div class="stat-comparison-row">
-            <div class="stat-comparison-label">パス</div>
-            <div class="stat-comparison-values">
-                <span class="player-stat">${playerStats.pass.toFixed(1)}</span>
-                <span class="vs">vs</span>
-                <span class="opponent-stat">${opponentStats.pass.toFixed(1)}</span>
-            </div>
+    opponentInfo.innerHTML = `
+        <div class="opponent-name-row">
+            <strong>対戦相手:</strong> ${data.opponent.name}
+            <span class="region-tactic">(${data.opponent.region} / ${data.opponent.tactic.name})</span>
         </div>
-        <div class="stat-comparison-row">
-            <div class="stat-comparison-label">ドリブル</div>
-            <div class="stat-comparison-values">
-                <span class="player-stat">${playerStats.dribble.toFixed(1)}</span>
-                <span class="vs">vs</span>
-                <span class="opponent-stat">${opponentStats.dribble.toFixed(1)}</span>
-            </div>
+        <div class="attempts-row">
+            <span class="attempts-remaining">残り死に戻り回数: <strong>${gameState.currentMatch.attemptsRemaining}</strong> / ${CONFIG.GAME.MAX_ATTEMPTS}</span>
         </div>
-        <div class="stat-comparison-row">
-            <div class="stat-comparison-label">シュート</div>
-            <div class="stat-comparison-values">
-                <span class="player-stat">${playerStats.shoot.toFixed(1)}</span>
-                <span class="vs">vs</span>
-                <span class="opponent-stat">${opponentStats.shoot.toFixed(1)}</span>
-            </div>
-        </div>
+    `;
+
+    // 能力値を表形式で表示
+    const statsTable = createElement('table', 'stats-comparison-table');
+    statsTable.innerHTML = `
+        <thead>
+            <tr>
+                <th></th>
+                <th>パス</th>
+                <th>ドリブル</th>
+                <th>シュート</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="team-label">ズッキュン中学</td>
+                <td class="player-stat">${playerStats.pass.toFixed(1)}</td>
+                <td class="player-stat">${playerStats.dribble.toFixed(1)}</td>
+                <td class="player-stat">${playerStats.shoot.toFixed(1)}</td>
+            </tr>
+            <tr>
+                <td class="team-label">${data.opponent.name}</td>
+                <td class="opponent-stat">${opponentStats.pass.toFixed(1)}</td>
+                <td class="opponent-stat">${opponentStats.dribble.toFixed(1)}</td>
+                <td class="opponent-stat">${opponentStats.shoot.toFixed(1)}</td>
+            </tr>
+        </tbody>
     `;
 
     setupDiv.appendChild(header);
     setupDiv.appendChild(opponentInfo);
-    setupDiv.appendChild(statsComparison);
+    setupDiv.appendChild(statsTable);
 
     // Load saved tactics if in retry mode, or load last tactics for new match
     if (data.retryMode && gameState.currentMatch.savedTactics.length > 0) {
@@ -860,12 +885,12 @@ function renderMatchSetupScreen(container, data) {
             const to = toSelect.value;
 
             if (!from || !to) {
-                alert('パス元とパス先を選択してください');
+                // P51: alertを削除
                 return;
             }
 
             if (from === to) {
-                alert('同じポジションにはパスできません');
+                // P51: alertを削除
                 return;
             }
 
@@ -878,7 +903,7 @@ function renderMatchSetupScreen(container, data) {
                 };
                 isEditingTactic = false;
                 editingTacticIndex = -1;
-                alert('作戦を変更しました');
+                // P51: alertを削除
             } else {
                 // Add new tactic
                 currentTactics.push({
@@ -970,7 +995,7 @@ function renderMatchSetupScreen(container, data) {
             const nextAction = nextSelect.value;
 
             if (!direction || !distanceId || !nextAction) {
-                alert('すべての項目を選択してください');
+                // P51: alertを削除
                 return;
             }
 
@@ -987,7 +1012,7 @@ function renderMatchSetupScreen(container, data) {
             if (nextAction === 'pass') {
                 const passTo = passToSelect.value;
                 if (!passTo) {
-                    alert('パス先を選択してください');
+                    // P51: alertを削除
                     return;
                 }
                 tacticData.passTo = passTo;
@@ -998,7 +1023,7 @@ function renderMatchSetupScreen(container, data) {
                 currentTactics[editingTacticIndex] = tacticData;
                 isEditingTactic = false;
                 editingTacticIndex = -1;
-                alert('作戦を変更しました');
+                // P51: alertを削除
             } else {
                 // Add new tactic
                 currentTactics.push(tacticData);
@@ -1048,7 +1073,7 @@ function renderMatchSetupScreen(container, data) {
             const shootType = typeSelect.value;
 
             if (!shootType) {
-                alert('シュートタイプを選択してください');
+                // P51: alertを削除
                 return;
             }
 
@@ -1060,7 +1085,7 @@ function renderMatchSetupScreen(container, data) {
                 };
                 isEditingTactic = false;
                 editingTacticIndex = -1;
-                alert('作戦を変更しました');
+                // P51: alertを削除
             } else {
                 // Add new tactic
                 currentTactics.push({
@@ -1129,13 +1154,13 @@ function renderMatchSetupScreen(container, data) {
     // Save preset button
     const savePresetBtn = createButton('作戦保存', () => {
         if (currentTactics.length === 0) {
-            alert('保存する作戦がありません');
+            // P51: alertを削除
             return;
         }
         const name = prompt('作戦名を入力してください:');
         if (name && name.trim()) {
             saveTacticsPreset(name.trim(), currentTactics);
-            alert(`作戦「${name.trim()}」を保存しました`);
+            // P51: alertを削除
         }
     }, 'btn btn-primary');
     presetControls.appendChild(savePresetBtn);
@@ -1154,7 +1179,7 @@ function renderMatchSetupScreen(container, data) {
     const startMatchBtn = createButton('試合開始', () => {
         const validation = validateTactics(currentTactics);
         if (!validation.valid) {
-            alert(validation.error);
+            // P51: alertを削除
             return;
         }
 
@@ -1349,7 +1374,7 @@ function renderMatchSetupScreen(container, data) {
                     if (toSelect && toSelect.value) {
                         // Validate that pass is not to the same person
                         if (ballHolder === toSelect.value) {
-                            alert('同じポジションにはパスできません');
+                            // P51: alertを削除
                             return;
                         }
 
@@ -1377,12 +1402,12 @@ function renderMatchSetupScreen(container, data) {
                         if (nextSelect.value === 'pass') {
                             const passToSelect = document.getElementById('pass-to-select');
                             if (!passToSelect || !passToSelect.value) {
-                                alert('パス先を選択してください');
+                                // P51: alertを削除
                                 return;
                             }
                             // Validate that pass is not to the same person
                             if (ballHolder === passToSelect.value) {
-                                alert('同じポジションにはパスできません');
+                                // P51: alertを削除
                                 return;
                             }
                             newTactic.passTo = passToSelect.value;
@@ -1418,12 +1443,7 @@ function renderMatchSetupScreen(container, data) {
                     dynamicControls.innerHTML = '';
                     isEditingTactic = false;
                     editingTacticIndex = -1;
-
-                    if (deletedCount > 0) {
-                        alert(`作戦${tacticIndex + 1}を変更しました\n以降の${deletedCount}個の作戦を削除しました（矛盾防止のため）`);
-                    } else {
-                        alert(`作戦${tacticIndex + 1}を変更しました`);
-                    }
+                    // P51: alertを削除
                 }
             }, 'btn btn-success');
 
@@ -1555,6 +1575,7 @@ function renderMatchSetupScreen(container, data) {
 }
 
 // Show interception overlay
+// P48: 「xxのyyを相手zzが止めた！」形式で表示
 function showInterceptionOverlay(matchDiv, info, onContinue) {
     console.log('showInterceptionOverlay called:', info);
 
@@ -1569,22 +1590,38 @@ function showInterceptionOverlay(matchDiv, info, onContinue) {
 
     const messageBox = createElement('div', 'interception-message');
 
-    // Build message based on interception type
-    let message = '';
+    // P48: 「xxのyyを相手zzが止めた！」形式でメッセージを構築
+    let holderName = '';
+    let actionName = '';
+    let interceptorName = info.interceptor ? info.interceptor.name : 'GK';
+
     if (info.type === 'pass') {
         const fromPos = CONFIG.POSITIONS[info.from];
-        const toPos = CONFIG.POSITIONS[info.to];
-        message = `パス失敗！\n${fromPos.name} → ${toPos.name}\n${info.interceptor.name}にカットされました`;
+        holderName = fromPos ? fromPos.name : info.from;
+        actionName = 'パス';
     } else if (info.type === 'shoot') {
         const shooterPos = CONFIG.POSITIONS[info.shooter];
-        message = `シュート失敗！\n${shooterPos.name}のシュートが\n${info.interceptor.name}にブロックされました`;
+        holderName = shooterPos ? shooterPos.name : info.shooter;
+        actionName = 'シュート';
     } else if (info.type === 'dribble') {
         const holderPos = CONFIG.POSITIONS[info.ballHolder];
-        message = `ドリブル失敗！\n${holderPos.name}が\n${info.interceptor.name}に止められました`;
+        holderName = holderPos ? holderPos.name : info.ballHolder;
+        actionName = 'ドリブル';
     }
 
-    const messageText = createElement('div', 'interception-text', message);
-    messageBox.appendChild(messageText);
+    // メインメッセージ
+    const mainMessage = createElement('div', 'intercept-main-message',
+        `${holderName}の${actionName}を相手${interceptorName}が止めた！`);
+    messageBox.appendChild(mainMessage);
+
+    // 「死に戻り発動！」のヘッダー表示
+    const reviveHeader = createElement('div', 'revive-header', '死に戻り発動！');
+    messageBox.appendChild(reviveHeader);
+
+    // 残り回数表示
+    const remainingText = createElement('div', 'remaining-attempts',
+        `残り回数: ${gameState.currentMatch.attemptsRemaining}回`);
+    messageBox.appendChild(remainingText);
 
     const continueBtn = createButton('続ける', () => {
         console.log('Continue button clicked');
@@ -1704,7 +1741,7 @@ function renderMatchScreen(container, data) {
                     } else {
                         // Retry with tactics
                         console.log('Showing retry screen');
-                        alert(`失敗！残りチャレンジ: ${gameState.currentMatch.attemptsRemaining}回`);
+                        // P51: alertを削除（死に戻り発動はインターセプト画面で表示済み）
                         switchScreen(SCREENS.MATCH_SETUP, { opponent: data.opponent, retryMode: true });
                     }
                 }

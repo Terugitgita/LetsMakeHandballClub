@@ -1,0 +1,1986 @@
+フォーマットファイルの作業内容は無視してください。
+
+本プロジェクトの仕様書は下記です。
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\handball_game_specification.md"
+
+本プロジェクトにCLIを作ってください。
+そのCLIを使って、徹底的にバグ取りをしたいです。
+
+私に質問は？
+
+質疑応答は"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\仕様変更・修正依頼_質疑応答01.md"に直接読み書きしてください。
+
+============================================================================================================================================================================================================
+
+⑦"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\All_Pattern_Test_01.md"
+CLIによるテストは、「考えうる全てのパターン」を⑦にリストアップし、それらがClaude Codeではなく、ローカル環境で自動実行され、成功/失敗が自動記入されるテストプログラムにして。
+そのテスト結果をClaude Codeが後程読み込み、失敗部分だけを自動でPDCA出来る様にして。
+
+私に質問は？
+
+
+
+
+CLIテストは自分で実行します。
+テスト結果は、Claude Codeが解析できる形式で出力される様になっていますか？
+
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\All_Pattern_Test_01.md"はテストパターンが不十分です。
+テストパターン約3,700件を自動生成し、そのパターンに沿ってテストするプログラムを作ってください。
+
+テストは全て成功しました。"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\test-results.json"
+しかし最初の不十分だった時のテストパターンでは、"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\pdca-report.md"の通り、8件のエラーがありました。
+その時のテストパターンを、別ファイル名で再作成して。
+テスト結果も、2桁の連番で区別できるようにして。
+
+
+
+============================================================================================================================================================================================================
+
+このテスト手法で3,700件全てをテスト出来る？
+
+  対応方法:
+  1. テストコードを実際のgameState構造に合わせて書き直す
+  2. full-test-generator.jsも厳密なテスト手法と共に同様に修正
+
+
+何故447件しかないの？
+約3,700件では？
+
+厳密手法のベーシックテストでは「"undefined" is not valid JSON」を除いて27件のエラーが検出されましたが、厳密手法に修正後のフルテストでは1件しか検出されませんでした。
+本当に両テストの手法は同一ですか？
+
+
+
+
+============================================================================================================================================================================================================
+
+
+1. 平日画面でも練習メニュー選択画面でも、下にスクロールできるが、上に戻れない。
+2. 練習メニュー選択画面で、下にスクロールしないと全てのメニューを確認出来ないので、表形式にしてスクロールしなくても全てのメニューを確認/選択出来るようにして。
+3. 作戦セットを作って、試合でそのセットを使えるようにして。作戦セットは平日に作成することも出来るし、試合中に設定した作戦をそのままセットに出来るようにして。作戦セットは名前を付けて、新規作成/編集/削除が出来るようにして。
+4. 試合で作戦を立てている時、ドリブルをした場合、作戦から主語が無くなる。『誰が』がわかるようにして。
+5. 勝利や敗北画面で、文字ボックスが不透明な為、背景画像が見えない。文字ボックスの背景色を透明度50%にして。
+6. 前の試合で採用した作戦を、次の試合でもデフォルトにして。
+7. 勝利画面で『次へ進む』という文字ボックスがあるので、『次の試合へ進みます』は不要。
+8. 作戦立案中、誰がエースなのかがわかるようにして。
+9. 試合中、ピボットがシュートして、ゴールが決まった後、点数が加算され、ピボットの所にボールが戻ってきて、そのままゲームがフリーズする。
+
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\仕様変更・修正依頼_質疑応答01.md"
+ここで質疑応答しましょう。
+
+
+
+
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\仕様変更・修正依頼_質疑応答01_進捗表.md"
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\仕様変更・修正依頼_質疑応答01.md"
+
+進捗表と会話履歴を更新して。
+
+改修が終わった後は、私が自分でflutter runします。
+質疑応答完了。作業開始。
+
+============================================================================================================================================================================================================
+
+
+
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\CLICK_ME.bat"
+
+申し訳ございません。このページに到達できません
+localhost 接続が拒否されました。
+お試しください:
+
+Web で localhost を検索
+接続を確認してみてください
+プロキシとファイアウォールの確認
+ERR_CONNECTION_REFUSED
+
+P10
+平日の音楽、画面を遷移する度に音楽をリセットせず、試合が始まるまでノンストップで流し続けて。
+
+P11
+試合後、勝利！の画面で「ズッキュン中学 1-0 xx代表」の文字ボックスの背景色が透明度50%になっていない。文字色は、背景色と色差を大きくして、視認性を上げてください。
+
+P12
+練習メニュー選択画面で、現在の能力値も縦に並べるのではなく、練習メニューと同じ列幅でパス、ドリブル、シュートの現在値を表して。
+
+P13
+時々、総合練習の合計値がおかしい。その週の最大上昇値ではなく、その週の最小上昇値になっている。
+
+P14
+「CB→ドリブル→Pにパス→Pがコーナーにシュート」この条件の時、Pにパスせず、CBがそのままシュートしてしまう。
+
+P15
+「CB→ドリブル→Pにパス→PがLBにパス→LBがコーナーにシュート」この条件の時、Pにパスせず、CBがLBにパスし、LBがシュートしてしまう。
+
+P16
+Pが6mラインに入っていると判定されて、パスされない状態になっている？
+
+P17
+試合前の作戦立案中、作戦を変更して「変更を確定」ボタンを押しても、次の作戦を立てられず「キャンセル」するしかない。
+
+P18
+「CBパス→LBパス→LWパス→LBパス→RB」「ここで相手のCBにインターセプトされる」という作戦を二回繰り返したら、二回目のインターセプトの時点でスコアが1-1になって、試合がフリーズ。リセットするしかなくなった。
+
+P19
+時々試合がフリーズする時の為に、設定画面から「試合前に戻る」ボタンを設定して。
+
+P20
+スマホでプレイする時に音楽が再生されない。
+
+質疑応答しましょう。
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\仕様変更・修正依頼_質疑応答01.md"
+
+
+============================================================================================================================================================================================================
+
+解決済み
+P10, 11, 12, 13, 17, 
+
+P18 問題残存
+RBがシュートした時も画面がフリーズした。
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\実行結果02.txt"
+
+P19 未解決
+GUIの「歯車ボタン」をクリックしても「音声ON/OFF」と「閉じる」しか無い。
+
+P21
+「今日の一句」が「読み込み中」と数秒表示され、その後は毎回同じ「ずっきゅんと　ずきゅずきゅずっきゅん　たまんない」しか表示されない。
+
+P22
+平日練習の「全日」をクリックしたときの総合練習は、その日の上昇値判定を残りの日数分掛けるのではなく、一日ずつの能力値の上昇に応じて、適切な上昇値が採用されること。
+
+
+P24
+試合の下記全てのパターンを生成するプログラムを作って。
+
+x手目でシュート
+x = 1-5
+
+この全てのパターンをハードコーディングするととんでもないファイルサイズになるので、最小のコード数で全てのパターンを網羅できるように工夫して。
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\All_Pattern_Test_05.md"には全パターンを一つずつ記載する必要は無く、a x b x c x d = yパターンという様に、概略だけ記載し、"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\test-results-05.json"には期待通りに動かなかったパターンだけをClaude Codeが理解・分析・対応できる最小の情報だけ記載して。
+
+
+これをCLIで全てGUIと同じ様に厳密に実行し、期待と異なる動きをしたもののみを下記に記録して。
+また、ファイル名末尾の連番は、自動で増えていくようにして。
+
+テストを通す事が目的ではなく、期待と異なる動きをするコードを見つけるデバッグが目的です。
+厳密にテストしてください。
+
+まずは質疑応答しましょう。
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\仕様変更・修正依頼_質疑応答01.md"
+
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\仕様変更・修正依頼_質疑応答01.md"
+他にコメントや質問は？
+
+
+
+============================================================================================================================================================================================================
+
+Cだが、プログラムはどう記述して全パターンを認識させ、結果を記述させる？
+簡潔に説明して。
+
+成功パターンは詳細記述不要。「 xxx-yyyまで成功」とまとめて記述して。
+味方全ポジション、敵全パターンの組み合わせも入っている？
+コーディングはまだです。
+
+はい。
+コードはどれぐらいの行数になりそう？
+
+テストは私が実行するので、実行用cmdコードを教えて。
+
+P21
+ランダム川柳は下記から上中下の句を動的に読み込んで。
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\Random Senryu\Random_Senryu_01.txt"
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\Random Senryu\Random_Senryu_02.txt"
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\Random Senryu\Random_Senryu_03.txt"
+
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-generator.js
+
+テストは私が実行するので、実行用cmdコードを教えて。
+
+失敗0件が気になる。
+厳密に全てのエラー、予期せぬ動きを余さずキャッチ出来るテスト方式になっている？
+
+もちろん。
+その為のテストです。
+厳密に実際の試合をシミュレートし、正しく全ての状況を試してください。
+その結果もClaude Codeがエラーの状況を正しく把握・対応出来る必要十分な情報を、最高の効率で出力するコードにして。
+まずは質疑応答ファイル、進捗表、会話履歴を更新して。
+
+このテストは並列実行で高速化出来る？
+並列化断念。
+シングルスレッドで完成させて。
+
+テストは私が実行するので、Claude Code側で勝手に実行しないように。実行用cmdコードを教えて。
+
+F:\LetsMakeHandballClub_2\LetsMakeHandballClub>  node cli/match-pattern-test.js 2 100
+=== 試合パターンテスト（実ロジック版）===
+最大手数: 2
+サンプリング率: 100%
+
+
+=== 結果 ===
+総パターン数: 11,664件
+テスト実行数: 11,664件
+成功（正常終了）: 11,664件
+失敗（エラー）: 0件
+実行時間: 0.1秒
+
+手数別パターン数:
+  1手: 648件
+  2手: 11,016件
+
+結果種別:
+  goal: 6,852件
+  blocked: 4,812件
+
+F:\LetsMakeHandballClub_2\LetsMakeHandballClub>
+
+
+これだと、「CBがPにパスして、Pがシュートするはずが、CBが直接シュートしてしまう」というエラーがキャッチできていない。
+GUIだけの問題と考えるべきなのか？それともシミュレートが不十分？
+
+yes
+
+「対象Aにパスするはずが、対象Aにパスされなかった」こういうものも全て検出される？
+
+「対象Aにパスするはずが、対象Aにパスされなかった」これは一例です。
+全てのパターンにおいて、「期待する動作」と「結果」が異なる全ての場合を検出できますか？
+
+私の目的を完全に達成する為には、どれが最も効率的？
+
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\実行結果02.txt"
+全パターンエラーの理由は？
+
+テスト環境/検証ロジックの問題を先に解決して。
+
+全て検証して。
+
+まず「期待する結果」を用意して、「実際の結果」と比較するロジックになっていますか？
+
+確率計算が必要なものを除いて、全項目を「期待値 vs 実際値」のパターンに統一してください。
+
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\実行結果01.txt"
+失敗パターンをClaude Codeが解析する為の最小限必要十分なログはどう出力されるの？
+
+
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\実行結果02.txt"
+テストログは"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\Test_Log"に出力して。
+
+テストファイルによって自動出力されるログの事ですよ。
+
+テストは私が手動で実行するので、ログファイルが適切に出力されない問題を解決して。
+
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+
+もうログファイルはいいです。
+私が示します。
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\実行結果01.txt"
+
+表記バグもballholder_mismatchも修正して。
+
+つまりロギングが不十分です。
+エラーが出た場合、初めてのパターンであれば詳細に表記。
+同じパターンのエラーの場合、省略表記として。
+
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 1 100
+  node cli/match-pattern-test.js 2 10
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3 1
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 4 0.1
+  node cli/match-pattern-test.js 5 1
+
+
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\Test_Log"に何も出力されていません。
+
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+を実行しました。
+ログファイルは出力されましたか？
+============================================================================================================================================================================================================
+
+このレベルで解析可能ですか？
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\Test_Log\実行結果05.txt"
+
+自己パスはあり得ない。
+テストから除外。
+
+「  node cli/match-pattern-test.js 4 0.1」これで実行した場合、4手目でシュートのパターンの0.1%だけ実行される？
+Noであれば、任意の確率で実行される様にして。
+同じテストを同じ確率で実行しても、サンプリングはランダムになる様にして。
+
+各手数で任意に確率を指定出来る様にして。
+また同じテストを同じ確率で実行しても、サンプリングはランダムになる様にして。
+
+
+「node cli/match-pattern-test.js 10 100,100,50,10,1,0.1,0.1,0.01,0.001,0.0001」これでも実行可能？
+
+確率ではなく、各手数での最大サンプリング数を指定する事も可能？
+
+「node cli/match-pattern-test.js 10 n1000」こうしたら、1-10手目までの全ての手数で、最大1000サンプルまで試行する？
+同じコードを複数回試行した場合、サンプリング番号は毎回同じ手順が選ばれずにランダムに選ばれる？
+
+最初に総パターン数(Nmax)を算出し、Nmax<=1000の時は全数検査。Nmax>1000の時は1000/Nmaxの確率で採用して。
+最終的にサンプル数が1000からブレても全く問題ない。
+
+
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  「node cli/match-pattern-test.js nm n500」こうした時に、m手目シュートのパターンだけをテストする事は可能？
+
+パターン数の計算にあまりに時間がかかります。
+各手数の大雑把な手数は？
+10^nの形式でも大丈夫です。
+
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+
+============================================================================================================================================================================================================
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3 n1000
+つまり、テストのバグであり、実装に間違いはないという事？
+
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 6! n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 7! n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 8! n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 9! n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 10! n1000
+
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+
+node cli/match-pattern-test.js 6! 0.001
+
+
+これでターミナルが止まりました。
+Nodes.js Javascrypt runtimeがCPU 10%程度, Memory 50MB程度で動作していますが、なぜターミナルが止まったの？
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+「平日の残り日数全て同じ練習」のメニューが最初の二週間は消えている。
+
+ランダム川柳に、「"」「,」は不要。
+
+全国大会の決勝戦の相手がてぇでぇずになっていない。
+
+TOPページが、最初に表示されたときは青背景のみになっている。
+一度全国優勝して、二週目に入った時のTOPページには背景画像が適用されている。
+
+決勝は何をしてもてぇでぇずに勝てない様にして。
+パスのカット率も非常に高く、シュートは100%止められる。
+しかしそれはGUI上で相手がいないのにシュートが止められるような不自然な判定ではなく、相手の動きが非常に速く、ドリブルもパスも67%の確率で止められて、シュートはフィールドプレーヤーによって止められる可能性が67%で、キーパーによって止められる可能性を１００％にして。
+
+フィールドプレーヤーもキーパーも非常に速い動きで、パスやシュートの線上に一人は立ちはだかる様にして。
+
+
+window.debugGame.advanceToFinals()
+
+てぇでぇず戦に限らず、フィールドプレーヤーやGKがパスやシュートを止めた時、ボールが止めたプレーヤーの所に留まる様なアニメーションにして。
+
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+GKはてぇでぇず戦以外でも滑らかに動ける？
+
+てぇでぇず以外のチームに勝つのが簡単すぎます。
+フィールドプレーヤー達の動くスピードを1.5倍にして。
+
+
+①"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\会話履歴.md"
+②"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\会話履歴 - Temp.md"
+
+①がこれまでの会話履歴です。②が記録されていないかもしれない会話履歴です。
+まずは②の内容のうち、①に記録されていない文を①に統合してください。
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+P42
+ゲームのサブタイトルを「死に戻りチートで絶対優勝！？」にして。
+
+P43
+試合で相手に攻撃を遮られたら、「死に戻り発動！」と大きく表示して、作戦画面に戻して。作戦画面での「残りチャレンジ回数 n/10」も「残り死に戻り回数 n/10」に変更。
+
+P44
+「全日」練習を選択したら、パスドリブルシュートがそれぞれどれだけ向上するか表示して。
+
+P45
+相手のGKがシュートのボールに追いついた時のシュートを止める確率はどう計算されている？
+
+P46
+作戦決定画面のレイアウト。
+「地方」と「守備戦術」を一行にまとめる。
+
+チーム/パス/ドリブル/シュート/
+自チーム/ xxx / yyy / zzz /
+相手チーム / aaa / bbb / ccc /
+とする。
+
+P47
+まだてぇでぇずに勝ててしまう。
+自然な動きではあるが、GKが必ずシュートに追いつき、必ずシュートを止める事。
+フィールドプレーヤーももっと速い動きで、パス/ドリブル/シュートを止めに来ること。
+
+質疑応答はここで。
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\仕様変更・修正依頼_質疑応答01.md"
+
+>> - B) FPが高速で（2〜3倍速）ラインに移動
+全FPではなく、パスやシュートの線上から最も近いFPだけが反応する事。
+
+>> インターセプト | 確率を上げる（ライン上でなくても一定確率でカット）
+ボールに追いついた時のみインターセプト発動。
+ボールに触れることなくインターセプトは成立しない。
+
+これは修正完了している？
+
+てぇでぇず戦と、それ以外の試合は別で考えて。
+
+>>   | 項目                               | 状況                          |
+>>   |------------------------------------|-------------------------------|
+>>   | 最も近いFPのみが高速反応           | ❌ 未実装                     |
+>>   | FPが2〜3倍速でラインに向かって移動 | ❌ 未実装（現在は全FPが高速） |
+
+これはてぇでぇず戦以外の仕様です。
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+TOPページの「ズッキュン中学物語」と「死に戻りチートで絶対優勝！？」に50%透明度背景を付けてください。
+今のままでは文字がかなり読みにくいです。
+
+
+P42 解決済み
+P43 「地方代表/守備傾向」が中央ぞろえになっていない。
+
+P44
+一例として、
+キャプテン「熱血、論理的」
+現在「Pass=4.1, Dribble=7.8, Shoot=4.3」
+月曜の時点で全日総合練習にすると、予告は「Pass=+1.0, Dribble=+0.7, Shoot=+0.9」となり、
+実行後は「Pass=6.2(+2.1), Dribble=9.1(+1.3), Shoot=6.1(+1.8)」で合計6.3となった。
+このキャプテンのパターンだと全パラメータ+2.5ずつで合計+7.5にならないとおかしいのでは？
+この例を参考にして、全パターン正しく算出される様に修正して。
+
+P45
+GKの真正面にシュートしているのに、GKが一向にシュートを止めない。阻止確率を見直して。
+
+P46 解決済み
+
+
+P47
+てぇでぇず学園に勝ててしまう。
+シュートがGKに当たっているにも関わらず、ゴール判定になる。
+「GKがシュートの線上にいる」という判定を見直して、正しくシュートを阻止して。
+
+P48　解決済み
+
+P49
+まだ最初のシュートで相手が一瞬吹っ飛んで、ボールがシューターに戻りもう一度シュートするという仕様になっている。
+そうではなく、シュートは一度きりで、相手が吹っ飛ぶのも一度きり。
+
+P50 解決済み
+
+"F:\LetsMakeHandballClub_2\LetsMakeHandballClub\docs\仕様変更・修正依頼_質疑応答01.md"
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+P48
+GKが止めた時はP48が表示されなくなくなっている。
+いつでもP48を適用する様に。
+
+P51
+試合中のPass/Dribble/Shootも作戦立案中と同じ表記に。
+
+P47問題残存
+てぇでぇずのGKがシュートを止められない。
+てぇでぇずには絶対勝ててはいけない。
+GKが100%の確率でシュートに追いついて、100%の確率でシュートを止める様に。
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  使用例:
+  # 3手目のみ、最大500サンプル
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 3! n500
+
+  # 5手目のみ、全数検査
+  node cli/match-pattern-test.js 5! 100
+
+  # 1〜4手（従来通り）
+  node cli/match-pattern-test.js 4 n1000
+  cd F:\LetsMakeHandballClub_2\LetsMakeHandballClub
+  node cli/match-pattern-test.js 2 10
+  window.debugGame.advanceToFinals()
+============================================================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+v

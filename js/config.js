@@ -215,9 +215,10 @@ export const ACTION_CONFIG = {
             { id: "left", label: "ゴールに対して左へ真っ直ぐ" }
         ],
         distances: [
-            { id: "short", time: 1, distance: 10, label: "短距離" },
-            { id: "medium", time: 3, distance: 30, label: "中距離" },
-            { id: "long", time: 5, distance: 50, label: "長距離" }
+            // P52: ドリブル速度を2倍に（時間を半分に）
+            { id: "short", time: 0.5, distance: 10, label: "短距離" },
+            { id: "medium", time: 1.5, distance: 30, label: "中距離" },
+            { id: "long", time: 2.5, distance: 50, label: "長距離" }
         ],
         nextActions: [
             { id: "dribble_back", label: "反対方向に中距離ドリブル" },
@@ -413,7 +414,8 @@ export const ANIMATION_CONFIG = {
 export const MESSAGES = {
     TITLE: {
         gameTitle: "ズッキュン中学物語",
-        subtitle: "全国制覇への道"
+        subtitle: "死に戻りチートで絶対優勝！？",
+        subtitleHighlight: "死に戻り"
     },
     MENU: {
         newGame: "ゲーム開始",
@@ -446,7 +448,7 @@ export const TEAM_NAME_FORMAT = {
 
 // 10. Debug Settings
 export const DEBUG_CONFIG = {
-    ENABLED: true,
+    ENABLED: true,  // デバッグモード有効化
     SHOW_FPS: false,
     SHOW_HITBOX: false,
     FAST_FORWARD: false,

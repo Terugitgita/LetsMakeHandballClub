@@ -36,24 +36,27 @@ class Player {
         // Knockback state
         this.isKnockedBack = false;
         this.knockbackStartTime = 0;
-        this.knockbackDuration = 2000; // 2 seconds in milliseconds
+        this.knockbackDuration = 3333; // P49: 60%のスピード（元の2秒 / 0.6 ≈ 3.3秒）
         this.originalX = this.x;
         this.originalY = this.y;
+
+        // Q26: 速度倍率（通常時は1.0、インターセプト時は2.5）
+        this.speedMultiplier = 1.0;
     }
 
     getSpeed() {
         const stats = this.team === 'player' ? getEffectiveStats() : gameState.currentMatch.opponent.stats;
         let baseSpeed = CONFIG.MOVEMENT.BASE_SPEED + (stats.dribble * CONFIG.MOVEMENT.STAT_MODIFIER);
 
-        // Apply defensive speed boost (1.3x for opponent team)
+        // Apply defensive speed boost (1.5x for opponent team)
         if (this.team === 'opponent') {
-            baseSpeed *= 1.3;
+            baseSpeed *= 1.5;
 
-            // ファイナルボス戦では敵の速度を大幅に上げる（3倍）
+            // ファイナルボス戦では敵の速度をさらに上げる（2倍追加）
             const isFinalBossMatch = gameState.currentMatch?.opponent?.prefecture === CONFIG.FINAL_BOSS.prefecture &&
                                      gameState.tournament.currentRound === 6;
             if (isFinalBossMatch) {
-                baseSpeed *= 3.0;
+                baseSpeed *= 2.0;
             }
         }
 
@@ -61,6 +64,9 @@ class Player {
         if (this.positionKey === 'GK') {
             baseSpeed *= 1.5;
         }
+
+        // Q26: インターセプト時の速度倍率を適用
+        baseSpeed *= this.speedMultiplier;
 
         if (this.isGearSecond) {
             return baseSpeed * CONFIG.ACE.GEAR_SECOND_MULTIPLIER;
@@ -209,9 +215,17 @@ export class MatchSimulator {
         // Shoot result waiting flag (prevents next action until shoot resolves)
         this.awaitingShootResult = false;
 
+        // P49: ドリブル後シュート実行時に次のシュートアクションをスキップするフラグ
+        this.skipNextShootAction = false;
+
         // Action icon display
         this.actionIconElement = null;
         this.currentAction = null;
+
+        // Q26: 通常試合で最も近いFPのみが高速反応するための状態
+        this.nearestInterceptorKey = null;
+        this.interceptTargetX = null;
+        this.interceptTargetY = null;
 
         this.initializePlayers();
         this.initializeActionIcon();
@@ -252,8 +266,8 @@ export class MatchSimulator {
     }
 
     initializeActionIcon() {
-        // Create action icon element
-        this.actionIconElement = document.createElement('img');
+        // P51: Create action text element (instead of image icon)
+        this.actionIconElement = document.createElement('div');
         this.actionIconElement.className = 'match-action-icon';
         this.actionIconElement.style.display = 'none';
         document.body.appendChild(this.actionIconElement);
@@ -263,12 +277,16 @@ export class MatchSimulator {
         if (!this.actionIconElement) return;
 
         this.currentAction = action;
-        const actionImg = assetManager.getActionImage(action);
 
-        if (actionImg) {
-            this.actionIconElement.src = actionImg.src;
-            this.actionIconElement.style.display = 'block';
-        }
+        // P51: アクション表記を作戦立案画面と同じ日本語に変更
+        const actionLabels = {
+            'pass': 'パス',
+            'dribble': 'ドリブル',
+            'shoot': 'シュート'
+        };
+
+        this.actionIconElement.textContent = actionLabels[action] || action;
+        this.actionIconElement.style.display = 'block';
     }
 
     hideActionIcon() {
@@ -298,6 +316,12 @@ export class MatchSimulator {
 
     pause() {
         this.isPaused = true;
+        // P48: インターセプト時はボールをターゲット位置（インターセプターの位置）に即座に移動
+        if (this.pendingTakeover && this.ballAnimating) {
+            this.ballX = this.ballTargetX;
+            this.ballY = this.ballTargetY;
+            this.ballAnimating = false;
+        }
     }
 
     resume() {
@@ -448,22 +472,35 @@ export class MatchSimulator {
                 console.log('Dribble completed. nextAction:', action.data.nextAction, 'passTo:', action.data.passTo);
                 if (action.data.nextAction === 'dribble_back') {
                     this.executeDribbleBack();
+                    this.finishAction();
                 } else if (action.data.nextAction === 'pass') {
+                    // P53: ドリブル後のパスは、パス完了まで待つ必要がある
+                    // actionをpassタイプに変更して、passの処理に任せる
                     if (action.data.passTo) {
                         console.log('Executing pass to:', action.data.passTo);
-                        this.executePass(action.data.passTo);
+                        action.type = 'pass';
+                        action.data = { to: action.data.passTo };
+                        action.started = false;
+                        // finishAction()は呼ばない - passの処理でballAnimating完了後に呼ばれる
                     } else {
                         console.error('Dribble->Pass: passTo is undefined, treating as turnover');
                         this.handleOpponentTakeover();
+                        this.finishAction();
                     }
                 } else if (action.data.nextAction === 'shoot_corner') {
                     this.executeShoot('corner');
+                    // P49: ドリブル後にシュートを実行したら、次のアクションがシュートタイプならスキップ
+                    this.skipNextShootAction = true;
+                    this.finishAction();
                 } else if (action.data.nextAction === 'shoot_center') {
                     this.executeShoot('center');
+                    // P49: ドリブル後にシュートを実行したら、次のアクションがシュートタイプならスキップ
+                    this.skipNextShootAction = true;
+                    this.finishAction();
                 } else {
                     console.warn('Unknown nextAction:', action.data.nextAction);
+                    this.finishAction();
                 }
-                this.finishAction();
             }
         } else if (action.type === 'pass') {
             // Wait for ball animation to complete
@@ -474,6 +511,17 @@ export class MatchSimulator {
                 this.executePass(action.data.to);
             }
         } else if (action.type === 'shoot') {
+            // P49: ドリブル後に既にシュートが実行された場合、このシュートアクションをスキップ
+            if (this.skipNextShootAction) {
+                console.log('[P49] Skipping duplicate shoot action after dribble');
+                this.skipNextShootAction = false;
+                // シュートが既に完了するのを待つ
+                if (!this.ballAnimating && !this.awaitingShootResult) {
+                    this.finishAction();
+                }
+                return;
+            }
+
             // Wait for ball animation to complete AND shoot result to be determined
             if (!this.ballAnimating && action.started && !this.awaitingShootResult) {
                 this.finishAction();
@@ -647,6 +695,9 @@ export class MatchSimulator {
             return;
         }
 
+        // Q26: 通常試合で最も近いFPを特定
+        this.setNearestInterceptor(fromPlayer.x, fromPlayer.y, toPlayer.x, toPlayer.y);
+
         // Check line interception
         console.log('Checking line interception...');
         const interceptor = this.checkLineInterception(
@@ -812,21 +863,39 @@ export class MatchSimulator {
             shootType: shootType,
             from: { x: shooter.x, y: shooter.y },
             target: { x: goalX, y: goalY },
-            gkPos: gk ? { x: gk.x, y: gk.y } : null
+            gkPos: gk ? { x: gk.x, y: gk.y } : null,
+            isFinalBoss: this.isFinalBoss
         });
 
-        // Animate ball to goal
+        // P47修正: ファイナルボス戦でもFP判定を有効化
+        // GKは瞬間移動ではなく、シュートと同時に滑らかに移動開始
+        // ボールの目標はGKのy位置に設定し、GKが100%セーブ
+
+        // Animate ball to goal (or GK position for final boss)
         this.ballTargetX = goalX;
-        this.ballTargetY = goalY;
+        // P47: ファイナルボス戦ではボールの目標をGKのy位置に設定（GKが確実にセーブ）
+        if (this.isFinalBoss && gk) {
+            this.ballTargetY = gk.y; // GKのy位置で止まる
+        } else {
+            this.ballTargetY = goalY;
+        }
         this.ballAnimating = true;
         this.ballSpeed = 120; // Faster for shots
 
-        // ファイナルボス戦ではGKがシュートの目標位置に向かって移動開始
-        // シュート時のGK追跡用の目標位置を保存
-        if (this.isFinalBoss && gk) {
-            console.log('[FINAL BOSS] GK tracking shot target at x:', goalX);
-            this.finalBossShootTargetX = goalX;
+        // シュート時のGK追跡用の目標位置を保存（全試合共通）
+        if (gk) {
+            this.shootTargetX = goalX;
+            this.gkStartX = gk.x;
+            this.shootStartY = this.ballY;
+            // P47: ファイナルボス戦ではGKがシュート目標に向かって移動開始
+            if (this.isFinalBoss) {
+                gk.setTarget(goalX, gk.y);
+                console.log(`[FINAL BOSS] GK starting smooth movement to x=${goalX}`);
+            }
         }
+
+        // Q26: 通常試合で最も近いFPを特定
+        this.setNearestInterceptor(shooter.x, shooter.y, goalX, goalY);
 
         // Check line to goal
         const interceptor = this.checkLineInterception(
@@ -872,36 +941,109 @@ export class MatchSimulator {
                 // Continue with shot - check if on target
                 const isOnTarget = goalX >= goalLeft && goalX <= goalRight && goalY <= 1;
 
-                // ファイナルボス戦でオンターゲットの場合、GKが100%セーブ
+                // P47修正: ファイナルボス戦でオンターゲットの場合、GKが滑らかに移動して100%セーブ
+                // GKは瞬間移動せず、ボールと同時に移動（上で目標設定済み）
                 if (this.isFinalBoss && isOnTarget) {
-                    console.log('[FINAL BOSS] Shot on target - GK save check');
-                    const gkSaveResult = this.rollFinalBossBreakthrough('shoot', true);
-                    if (!gkSaveResult) {
-                        console.log('[FINAL BOSS] GK saves the shot!');
-                        // GKがセーブ - ボールをGKの位置に移動
-                        const gkPlayer = this.opponents['GK'];
-                        if (gkPlayer) {
-                            this.ballTargetX = gkPlayer.x;
-                            this.ballTargetY = gkPlayer.y;
-                            this.ballAnimating = true;
+                    console.log('[FINAL BOSS] Shot on target (FP passed) - GK 100% save with smooth movement');
+                    const gkPlayer = this.opponents['GK'];
+                    // ボールの目標は既にGKのy位置に設定済み（上で設定）
+                    // GKも既に目標に向かって移動中
+                    // P47/P48: GKセーブもインターセプトとして扱い、死に戻り発動
+                    this.interceptionInfo = {
+                        type: 'shoot',
+                        interceptor: gkPlayer,
+                        shooter: this.ballHolder,
+                        gkSave: true
+                    };
+                    this.pendingTakeover = true;
+                    this.logAction({
+                        action: 'shoot_saved_by_gk',
+                        interceptor: interceptor.positionKey,
+                        gkSave: true,
+                        isFinalBoss: true
+                    });
+                    if (this.syncMode) {
+                        this.awaitingShootResult = false;
+                        this.pause();
+                        if (this.onInterceptionCallback) {
+                            this.onInterceptionCallback(this.interceptionInfo);
                         }
-                        this.logAction({
-                            action: 'shoot_saved_by_gk',
-                            interceptor: interceptor.positionKey,
-                            gkSave: true
-                        });
-                        if (this.syncMode) {
+                        this.ballSpeed = 80;
+                    } else {
+                        // ボールがGKに到達するまで待つ（滑らかなアニメーション）
+                        setTimeout(() => {
                             this.awaitingShootResult = false;
-                            this.handleOpponentTakeover();
+                            this.pause();
+                            if (this.onInterceptionCallback) {
+                                this.onInterceptionCallback(this.interceptionInfo);
+                            }
                             this.ballSpeed = 80;
-                        } else {
-                            setTimeout(() => {
-                                this.awaitingShootResult = false;
-                                this.handleOpponentTakeover();
-                                this.ballSpeed = 80;
-                            }, 500);
+                        }, 500);
+                    }
+                    return;
+                }
+
+                // P45: 通常試合 - FP突破後もGKセーブ判定を行う
+                if (!this.isFinalBoss && isOnTarget) {
+                    const gkPlayer = this.opponents['GK'];
+                    if (gkPlayer) {
+                        // GKがシュートライン上にいるかチェック
+                        const gkDistToLine = pointToLineDistance(gkPlayer.x, gkPlayer.y, shooter.x, shooter.y, goalX, goalY);
+                        const gkToTargetDistance = distance(gkPlayer.x, gkPlayer.y, goalX, goalY);
+
+                        // GKがライン上にいる（距離5以内）またはゴール前にいる（距離10以内）場合
+                        const gkOnLine = gkDistToLine < 5 && gkToTargetDistance < 15;
+
+                        if (gkOnLine) {
+                            // GKセーブ判定（高確率）
+                            const playerStats = getEffectiveStats();
+                            const opponentStats = this.opponent.stats;
+                            const fpBlockRate = 100 - calculateSuccessRate(playerStats.shoot, opponentStats.shoot);
+                            const gkSaveRate = (fpBlockRate + 100) / 2;
+
+                            console.log(`[GK ON LINE] Dist to line: ${gkDistToLine.toFixed(1)}, Dist to target: ${gkToTargetDistance.toFixed(1)}, Save Rate: ${gkSaveRate.toFixed(1)}%`);
+
+                            if (Math.random() * 100 < gkSaveRate) {
+                                console.log('[GK] Saves the shot after FP breakthrough!');
+                                gkPlayer.setTarget(goalX, goalY);
+                                this.ballTargetX = goalX;
+                                this.ballTargetY = gkPlayer.y;
+                                this.ballAnimating = true;
+                                // P48: 通常試合GKセーブでもインターセプトオーバーレイを表示
+                                this.interceptionInfo = {
+                                    type: 'shoot',
+                                    interceptor: gkPlayer,
+                                    shooter: this.ballHolder,
+                                    gkSave: true
+                                };
+                                this.pendingTakeover = true;
+                                this.logAction({
+                                    action: 'shoot_saved_by_gk',
+                                    afterFPBreakthrough: true,
+                                    gkSave: true,
+                                    gkDistToLine: gkDistToLine,
+                                    gkSaveRate: gkSaveRate
+                                });
+                                if (this.syncMode) {
+                                    this.awaitingShootResult = false;
+                                    this.pause();
+                                    if (this.onInterceptionCallback) {
+                                        this.onInterceptionCallback(this.interceptionInfo);
+                                    }
+                                    this.ballSpeed = 80;
+                                } else {
+                                    setTimeout(() => {
+                                        this.awaitingShootResult = false;
+                                        this.pause();
+                                        if (this.onInterceptionCallback) {
+                                            this.onInterceptionCallback(this.interceptionInfo);
+                                        }
+                                        this.ballSpeed = 80;
+                                    }, 500);
+                                }
+                                return;
+                            }
                         }
-                        return;
                     }
                 }
 
@@ -977,36 +1119,128 @@ export class MatchSimulator {
         // Goal frame: x between 42.5% and 57.5%, y at 0%
         const isOnTarget = goalX >= goalLeft && goalX <= goalRight && goalY <= 1;
 
-        // ファイナルボス戦でオンターゲットの場合、GKが100%セーブ
-        if (this.isFinalBoss && isOnTarget) {
-            console.log('[FINAL BOSS] Shot on target (no FP intercept) - GK save check');
-            const gkSaveResult = this.rollFinalBossBreakthrough('shoot', true);
-            if (!gkSaveResult) {
-                console.log('[FINAL BOSS] GK saves the shot!');
-                // GKがセーブ - ボールをGKの位置に移動
-                const gkPlayer = this.opponents['GK'];
-                if (gkPlayer) {
-                    this.ballTargetX = gkPlayer.x;
-                    this.ballTargetY = gkPlayer.y;
-                    this.ballAnimating = true;
-                }
+        // GKセーブ判定（オンターゲットの場合のみ）
+        if (isOnTarget) {
+            const gkPlayer = this.opponents['GK'];
+
+            if (this.isFinalBoss) {
+                // P47修正: ファイナルボス戦：GKが滑らかに移動して100%セーブ
+                // GKは瞬間移動せず、ボールと同時に移動（executeShoot開始時に目標設定済み）
+                console.log('[FINAL BOSS] Shot on target (no FP intercept) - GK 100% save with smooth movement');
+                // ボールの目標とGKの目標は既に設定済み（executeShoot開始時）
+                // P47/P48: GKセーブもインターセプトとして扱い、死に戻り発動
+                this.interceptionInfo = {
+                    type: 'shoot',
+                    interceptor: gkPlayer,
+                    shooter: this.ballHolder,
+                    gkSave: true
+                };
+                this.pendingTakeover = true;
                 this.logAction({
                     action: 'shoot_saved_by_gk',
                     noFPIntercept: true,
-                    gkSave: true
+                    gkSave: true,
+                    isFinalBoss: true
                 });
                 if (this.syncMode) {
                     this.awaitingShootResult = false;
-                    this.handleOpponentTakeover();
+                    this.pause();
+                    if (this.onInterceptionCallback) {
+                        this.onInterceptionCallback(this.interceptionInfo);
+                    }
                     this.ballSpeed = 80;
                 } else {
+                    // ボールがGKに到達するまで待つ（滑らかなアニメーション）
                     setTimeout(() => {
                         this.awaitingShootResult = false;
-                        this.handleOpponentTakeover();
+                        this.pause();
+                        if (this.onInterceptionCallback) {
+                            this.onInterceptionCallback(this.interceptionInfo);
+                        }
                         this.ballSpeed = 80;
                     }, 500);
                 }
                 return;
+            } else if (gkPlayer) {
+                // P45: 通常試合 - GKセーブ判定を改善
+                const shooter = this.players[this.ballHolder];
+                const ballDistance = distance(shooter.x, shooter.y, goalX, goalY);
+                const gkToTargetDistance = distance(gkPlayer.x, gkPlayer.y, goalX, goalY);
+
+                // P45改善: GKがシュートライン上にいるかもチェック
+                const gkDistToLine = pointToLineDistance(gkPlayer.x, gkPlayer.y, shooter.x, shooter.y, goalX, goalY);
+
+                const ballSpeed = this.ballSpeed || 80;
+                const gkSpeed = gkPlayer.getSpeed() * 1.5; // GKは少し速く反応
+
+                const ballTime = ballDistance / ballSpeed;
+                const gkTime = gkToTargetDistance / gkSpeed;
+
+                // P45改善: GKがボールより先にシュート目標に到達できるか（マージン緩和 1.1→1.5）
+                // または、GKがシュートライン上にいる場合（距離5以内かつゴール前15以内）
+                const canGKReach = gkTime <= ballTime * 1.5;
+                const gkOnLine = gkDistToLine < 5 && gkToTargetDistance < 15;
+
+                console.log(`[GK SAVE CHECK] Ball dist: ${ballDistance.toFixed(1)}, GK dist: ${gkToTargetDistance.toFixed(1)}, GK line dist: ${gkDistToLine.toFixed(1)}, Ball time: ${ballTime.toFixed(2)}, GK time: ${gkTime.toFixed(2)}, Can reach: ${canGKReach}, On line: ${gkOnLine}`);
+
+                if (canGKReach || gkOnLine) {
+                    // GKが追いついた/ライン上にいた - セーブ判定
+                    // セーブ確率 = (FPの止める確率 + 100%) / 2
+                    const playerStats = getEffectiveStats();
+                    const opponentStats = this.opponent.stats;
+                    const fpBlockRate = 100 - calculateSuccessRate(playerStats.shoot, opponentStats.shoot);
+                    // P45改善: GKがライン上にいる場合は確率を上げる
+                    let gkSaveRate = (fpBlockRate + 100) / 2;
+                    if (gkOnLine) {
+                        gkSaveRate = Math.max(gkSaveRate, 80); // ライン上では最低80%
+                    }
+
+                    console.log(`[GK SAVE CHECK] FP Block Rate: ${fpBlockRate.toFixed(1)}%, GK Save Rate: ${gkSaveRate.toFixed(1)}%`);
+
+                    if (Math.random() * 100 < gkSaveRate) {
+                        console.log('[GK] Saves the shot!');
+                        this.ballTargetX = goalX;
+                        this.ballTargetY = gkPlayer.y;
+                        this.ballAnimating = true;
+                        // GKをシュート目標に移動させる
+                        gkPlayer.setTarget(goalX, goalY);
+                        // P48: 通常試合GKセーブでもインターセプトオーバーレイを表示
+                        this.interceptionInfo = {
+                            type: 'shoot',
+                            interceptor: gkPlayer,
+                            shooter: this.ballHolder,
+                            gkSave: true
+                        };
+                        this.pendingTakeover = true;
+                        this.logAction({
+                            action: 'shoot_saved_by_gk',
+                            noFPIntercept: true,
+                            gkSave: true,
+                            gkToTargetDistance: gkToTargetDistance,
+                            gkDistToLine: gkDistToLine,
+                            gkOnLine: gkOnLine,
+                            gkSaveRate: gkSaveRate
+                        });
+                        if (this.syncMode) {
+                            this.awaitingShootResult = false;
+                            this.pause();
+                            if (this.onInterceptionCallback) {
+                                this.onInterceptionCallback(this.interceptionInfo);
+                            }
+                            this.ballSpeed = 80;
+                        } else {
+                            setTimeout(() => {
+                                this.awaitingShootResult = false;
+                                this.pause();
+                                if (this.onInterceptionCallback) {
+                                    this.onInterceptionCallback(this.interceptionInfo);
+                                }
+                                this.ballSpeed = 80;
+                            }, 500);
+                        }
+                        return;
+                    }
+                }
             }
         }
 
@@ -1132,6 +1366,63 @@ export class MatchSimulator {
         return null;
     }
 
+    // Q26: パス/シュートラインから最も近いFPを特定し、インターセプト目標を設定
+    setNearestInterceptor(startX, startY, endX, endY) {
+        // ファイナルボス戦では使用しない（全FPが高速で動く）
+        if (this.isFinalBoss) {
+            this.nearestInterceptorKey = null;
+            return;
+        }
+
+        let nearestOpp = null;
+        let minDist = Infinity;
+        let nearestPointOnLine = null;
+
+        Object.entries(this.opponents).forEach(([key, opp]) => {
+            if (key === 'GK') return;
+
+            // ライン上の最も近い点を計算
+            const lineVec = { x: endX - startX, y: endY - startY };
+            const lineLen = Math.sqrt(lineVec.x * lineVec.x + lineVec.y * lineVec.y);
+            if (lineLen === 0) return;
+
+            const lineNorm = { x: lineVec.x / lineLen, y: lineVec.y / lineLen };
+            const toOpp = { x: opp.x - startX, y: opp.y - startY };
+            const proj = toOpp.x * lineNorm.x + toOpp.y * lineNorm.y;
+
+            // ライン上の最も近い点（ラインの範囲内に制限）
+            const clampedProj = Math.max(0, Math.min(lineLen, proj));
+            const closestX = startX + lineNorm.x * clampedProj;
+            const closestY = startY + lineNorm.y * clampedProj;
+
+            const dist = distance(opp.x, opp.y, closestX, closestY);
+
+            if (dist < minDist) {
+                minDist = dist;
+                nearestOpp = key;
+                nearestPointOnLine = { x: closestX, y: closestY };
+            }
+        });
+
+        if (nearestOpp && minDist < 30) { // 30ユニット以内のFPのみ反応
+            this.nearestInterceptorKey = nearestOpp;
+            this.interceptTargetX = nearestPointOnLine.x;
+            this.interceptTargetY = nearestPointOnLine.y;
+            console.log(`[Q26] Nearest interceptor: ${nearestOpp}, target: (${nearestPointOnLine.x.toFixed(1)}, ${nearestPointOnLine.y.toFixed(1)}), dist: ${minDist.toFixed(1)}`);
+        } else {
+            this.nearestInterceptorKey = null;
+            this.interceptTargetX = null;
+            this.interceptTargetY = null;
+        }
+    }
+
+    // Q26: インターセプター情報をクリア
+    clearNearestInterceptor() {
+        this.nearestInterceptorKey = null;
+        this.interceptTargetX = null;
+        this.interceptTargetY = null;
+    }
+
     // ファイナルボス専用AI - パス線上に立ちはだかる
     updateFinalBossAI(ballHolderPlayer) {
         const goalX = 50;
@@ -1187,21 +1478,18 @@ export class MatchSimulator {
             const margin = 1;
 
             // シュート中の場合、ボールの進行に合わせてGKも滑らかに移動
-            if (this.finalBossShootTargetX !== undefined && this.ballAnimating && this.ballTargetY <= 1) {
-                // シュート開始時のGK位置を保存
-                if (this.finalBossGKStartX === undefined) {
-                    this.finalBossGKStartX = gk.x;
-                    this.finalBossShootStartY = this.ballY; // シュート開始時のボールY位置
-                }
-
+            // P47修正: ファイナルボス戦ではボール目標がGKのy位置なので条件を調整
+            const isShootInProgress = this.shootTargetX !== undefined && this.ballAnimating &&
+                                      (this.ballTargetY <= 1 || this.ballTargetY <= gk.y + 1);
+            if (isShootInProgress) {
                 // ボールの進行度合いを計算（0〜1）
-                const totalDistance = this.finalBossShootStartY - this.ballTargetY;
-                const traveled = this.finalBossShootStartY - this.ballY;
+                const totalDistance = this.shootStartY - this.ballTargetY;
+                const traveled = this.shootStartY - this.ballY;
                 const progress = Math.min(1, Math.max(0, traveled / totalDistance));
 
                 // GKの位置をボールの進行に合わせて補間
-                const startX = this.finalBossGKStartX;
-                const endX = Math.max(goalLeft + margin, Math.min(goalRight - margin, this.finalBossShootTargetX));
+                const startX = this.gkStartX;
+                const endX = Math.max(goalLeft + margin, Math.min(goalRight - margin, this.shootTargetX));
                 const currentX = startX + (endX - startX) * progress;
 
                 // 直接位置を設定（滑らかに見える）
@@ -1255,6 +1543,18 @@ export class MatchSimulator {
             this.updateFinalBossAI(ballHolderPlayer);
             return;
         }
+
+        // Q26: 通常試合でボールがアニメーション中（パス/シュート中）の場合
+        // 最も近いFPだけがインターセプト目標に向かって高速移動（2.5倍速）
+        Object.entries(this.opponents).forEach(([key, opp]) => {
+            if (key === 'GK') return;
+            if (this.ballAnimating && key === this.nearestInterceptorKey && this.interceptTargetX !== null) {
+                opp.speedMultiplier = 2.5; // 2〜3倍速の中間
+                opp.setTarget(this.interceptTargetX, this.interceptTargetY);
+            } else {
+                opp.speedMultiplier = 1.0; // 通常速度
+            }
+        });
 
         switch (tactic.behavior) {
             case 'all_to_ball':
@@ -1379,37 +1679,41 @@ export class MatchSimulator {
             // Goal frame is 42.5% to 57.5%
             const goalLeft = 42.5;
             const goalRight = 57.5;
-            const goalCenter = 50;
 
-            let targetX;
+            // シュート中の場合、ボールの進行に合わせてGKも滑らかに移動（全試合共通）
+            // P47修正: ファイナルボス戦でも滑らかに移動するよう条件を修正
+            const isShootingToGoal = this.shootTargetX !== undefined && this.ballAnimating &&
+                (this.ballTargetY <= 1 || this.isFinalBoss);
+            if (isShootingToGoal) {
+                // ボールの進行度合いを計算（0〜1）
+                // P47: ファイナルボス戦ではボールがGKに向かうので、絶対値で計算
+                const totalDistance = Math.abs(this.shootStartY - this.ballTargetY);
+                const traveled = Math.abs(this.shootStartY - this.ballY);
+                const progress = totalDistance > 0 ? Math.min(1, Math.max(0, traveled / totalDistance)) : 1;
 
-            // ファイナルボス戦でシュート中の場合、最終目標位置に直接向かう
-            if (this.isFinalBoss && this.finalBossShootTargetX !== undefined && this.ballAnimating && this.ballTargetY <= 1) {
-                // シュートの最終目標位置に向かって移動（ボールの現在位置ではなく）
-                targetX = this.finalBossShootTargetX;
+                // GKの位置をボールの進行に合わせて補間
+                const startX = this.gkStartX;
+                const endX = Math.max(goalLeft + 1, Math.min(goalRight - 1, this.shootTargetX));
+                const currentX = startX + (endX - startX) * progress;
+
+                // 直接位置を設定（滑らかに見える）
+                gk.x = currentX;
+                gk.targetX = currentX;
             } else if (this.ballAnimating) {
-                // Follow the ball's actual position during animation
-                targetX = this.ballX;
-
-                // If ball is moving toward goal (y decreasing toward 0), react faster
-                if (this.ballY < 30 && this.ballTargetY < this.ballY) {
-                    // Ball is approaching goal - GK moves more aggressively to ball's x position
-                    targetX = this.ballX;
-                }
+                // パス中はボールを追跡
+                const targetX = Math.max(goalLeft + 1, Math.min(goalRight - 1, this.ballX));
+                gk.setTarget(targetX, basePos.y);
             } else {
-                // When ball is not animating, follow ball holder's position
-                targetX = ballHolderPlayer.x;
+                // 通常時はボールホルダーのX座標を追跡
+                const targetX = Math.max(goalLeft + 1, Math.min(goalRight - 1, ballHolderPlayer.x));
+                gk.setTarget(targetX, basePos.y);
                 // シュート完了後はフラグをクリア
-                if (this.finalBossShootTargetX !== undefined) {
-                    this.finalBossShootTargetX = undefined;
+                if (this.shootTargetX !== undefined) {
+                    this.shootTargetX = undefined;
+                    this.gkStartX = undefined;
+                    this.shootStartY = undefined;
                 }
             }
-
-            // Clamp to goal area with some margin
-            targetX = Math.max(goalLeft + 1, Math.min(goalRight - 1, targetX));
-
-            // Move GK only in x direction, y stays at goal line
-            gk.setTarget(targetX, basePos.y);
         }
     }
 
@@ -1458,6 +1762,7 @@ export class MatchSimulator {
         this.currentTacticIndex = 0;
         this.actionInProgress = null;
         this.awaitingShootResult = false;
+        this.skipNextShootAction = false;
         console.log('resetPositions complete:', {
             ballHolder: this.ballHolder,
             currentTacticIndex: this.currentTacticIndex,
