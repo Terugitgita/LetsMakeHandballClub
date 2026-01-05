@@ -52,6 +52,9 @@ export const gameState = {
     // Saved tactics presets (unlimited)
     tacticsPresets: [],
 
+    // P70: アクション履歴（最新5件を保持）- バグ報告用
+    actionHistory: [],
+
     // Position abilities (PowerPro style) - 弱点/強みシステム
     abilities: {
         // 練習カウンター（弱点克服/強み獲得の進捗）
@@ -1290,6 +1293,119 @@ export function getAbilitiesByCategory() {
     }
 
     return result;
+}
+
+// P70: アクション履歴を記録（最新5件を保持）
+export function recordAction(actionType, details) {
+    const timestamp = new Date().toISOString();
+    const action = {
+        timestamp,
+        week: gameState.currentWeek,
+        day: gameState.currentDay,
+        round: gameState.tournament.currentRound,
+        type: actionType,
+        details: details
+    };
+
+    gameState.actionHistory.push(action);
+
+    // 最新5件のみ保持
+    if (gameState.actionHistory.length > 5) {
+        gameState.actionHistory.shift();
+    }
+}
+
+// P70: アクション履歴をテキスト形式で取得
+export function getActionHistoryText() {
+    if (gameState.actionHistory.length === 0) {
+        return '履歴なし';
+    }
+
+    const lines = gameState.actionHistory.map((action, index) => {
+        const dayNames = ['', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜', '日曜'];
+        const dayName = dayNames[action.day] || `${action.day}日目`;
+        const roundName = getRoundNameForHistory(action.round);
+
+        let line = `${index + 1}. [Week ${action.week} ${dayName}] `;
+
+        switch (action.type) {
+            case 'training':
+                line += `練習実行: ${action.details.menu}`;
+                if (action.details.stats) {
+                    line += ` → P:${action.details.stats.pass} D:${action.details.stats.dribble} S:${action.details.stats.shoot}`;
+                }
+                break;
+            case 'match_start':
+                line += `試合開始 vs ${action.details.opponent} (${roundName})`;
+                break;
+            case 'match_tactic':
+                line += `作戦設定: ${action.details.tactics}`;
+                break;
+            case 'match_action':
+                line += `試合中: ${action.details.action} - ${action.details.result}`;
+                break;
+            case 'match_score':
+                line += `スコア: ${action.details.playerScore}-${action.details.opponentScore}`;
+                break;
+            case 'match_end':
+                line += `試合終了: ${action.details.result} (${action.details.playerScore}-${action.details.opponentScore})`;
+                break;
+            case 'screen_change':
+                line += `画面遷移: ${action.details.from} → ${action.details.to}`;
+                break;
+            case 'ace_awakening':
+                line += `エース覚醒: ${action.details.position}`;
+                break;
+            case 'ability_change':
+                line += `能力変化: ${action.details.change}`;
+                break;
+            default:
+                line += `${action.type}: ${JSON.stringify(action.details)}`;
+        }
+
+        return line;
+    });
+
+    return lines.join('\n');
+}
+
+// P70: 試合中の詳細状態を取得
+export function getMatchStateText() {
+    if (!gameState.currentMatch) {
+        return '試合中ではありません';
+    }
+
+    const match = gameState.currentMatch;
+    const roundName = getRoundNameForHistory(gameState.tournament.currentRound);
+
+    let text = `=== 試合状況 ===\n`;
+    text += `対戦相手: ${match.opponent.name} (${match.opponent.region})\n`;
+    text += `ラウンド: ${roundName}\n`;
+    text += `スコア: ${match.playerScore || 0}-${match.opponentScore || 0}\n`;
+    text += `残り死に戻り回数: ${match.attemptsLeft || '?'}\n`;
+    text += `\n=== 自チーム能力 ===\n`;
+    text += `パス: ${gameState.team.stats.pass}\n`;
+    text += `ドリブル: ${gameState.team.stats.dribble}\n`;
+    text += `シュート: ${gameState.team.stats.shoot}\n`;
+    text += `\n=== 相手チーム能力 ===\n`;
+    text += `パス: ${match.opponent.stats?.pass || '?'}\n`;
+    text += `ドリブル: ${match.opponent.stats?.dribble || '?'}\n`;
+    text += `シュート: ${match.opponent.stats?.shoot || '?'}\n`;
+
+    return text;
+}
+
+// Helper function for round name
+function getRoundNameForHistory(round) {
+    const names = {
+        1: "1回戦",
+        2: "2回戦",
+        3: "3回戦",
+        4: "準々決勝",
+        5: "準決勝",
+        6: "決勝"
+    };
+    return names[round] || `Round ${round}`;
 }
 
 // Export for debugging in browser console

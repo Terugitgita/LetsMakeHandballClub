@@ -1,7 +1,7 @@
 // training.js - Training System
 
 import { CONFIG } from './config.js';
-import { gameState, applyTraining, isBoycottActive, getCurrentDayInfo } from './gameState.js';
+import { gameState, applyTraining, isBoycottActive, getCurrentDayInfo, recordAction } from './gameState.js';
 import { deepClone } from './utils.js';
 
 // Get available training menus for current day
@@ -208,6 +208,8 @@ export function executeTraining(menuName) {
 
     if (success) {
         if (menuName === "休養") {
+            // P70: アクション履歴に記録
+            recordAction('training', { menu: menuName, type: 'rest' });
             return {
                 success: true,
                 message: CONFIG.MESSAGES.TRAINING.restBonus,
@@ -215,6 +217,11 @@ export function executeTraining(menuName) {
                 abilityChange: null
             };
         } else {
+            // P70: アクション履歴に記録
+            recordAction('training', {
+                menu: menuName,
+                abilityChange: abilityChange ? abilityChange.type : null
+            });
             return {
                 success: true,
                 message: CONFIG.MESSAGES.TRAINING.growth,

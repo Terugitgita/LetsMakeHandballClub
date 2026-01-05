@@ -1,7 +1,7 @@
 // screens.js - UI Screen Management
 
 import { CONFIG } from './config.js';
-import { gameState, initializeNewGame, saveGame, loadGame, hasSaveData, advanceDay, recordMatchResult, setCurrentMatch, clearCurrentMatch, isBoycottActive, changeCaptainPersonality, applyBoycottRestPenalty, saveLastTactics, getLastTactics, saveTacticsPreset, getTacticsPresets, getTacticsPreset, deleteTacticsPreset, simulateAllDaysTraining, getAbilityStatus, getAbilitiesByCategory } from './gameState.js';
+import { gameState, initializeNewGame, saveGame, loadGame, hasSaveData, advanceDay, recordMatchResult, setCurrentMatch, clearCurrentMatch, isBoycottActive, changeCaptainPersonality, applyBoycottRestPenalty, saveLastTactics, getLastTactics, saveTacticsPreset, getTacticsPresets, getTacticsPreset, deleteTacticsPreset, simulateAllDaysTraining, getAbilityStatus, getAbilitiesByCategory, recordAction, getActionHistoryText, getMatchStateText } from './gameState.js';
 import { initializeTournament, getNextOpponent, getCurrentRoundName, getSimplifiedBracket, processRoundResults, advanceTournament } from './tournament.js';
 import { getAvailableMenus, previewTrainingGrowth, executeTraining, getCaptainInfo } from './training.js';
 import { MatchSimulator, createTactic, validateTactics } from './match.js';
@@ -82,6 +82,10 @@ let currentTactics = [];
 // Main screen switching function
 export function switchScreen(screenName, data = {}) {
     currentScreen = screenName;
+
+    // P70: 画面遷移をアクション履歴に記録
+    recordAction('screenChange', { screen: screenName });
+
     const container = document.getElementById('game-container');
     container.innerHTML = '';
     container.className = `screen-${screenName}`;
@@ -94,6 +98,9 @@ export function switchScreen(screenName, data = {}) {
 
     // 設定ボタンを追加（全画面共通）
     addSettingsButton(container);
+
+    // P70: 「作者に一言」ボタンを追加（全画面共通）
+    addFeedbackButton(container);
 
     // 初回のみアセットロード開始（バックグラウンド）
     startLoadingAssets();
@@ -204,6 +211,313 @@ function showSettingsModal() {
     });
 
     document.body.appendChild(modal);
+}
+
+// P70: 「作者に一言」ボタンを追加（右上固定）
+function addFeedbackButton(container) {
+    const feedbackBtn = createElement('button', 'feedback-button');
+    feedbackBtn.innerHTML = '💬';
+    feedbackBtn.title = '作者に一言';
+
+    // オフライン時はグレーアウト
+    const updateOnlineStatus = () => {
+        if (navigator.onLine) {
+            feedbackBtn.disabled = false;
+            feedbackBtn.classList.remove('offline');
+            feedbackBtn.title = '作者に一言';
+        } else {
+            feedbackBtn.disabled = true;
+            feedbackBtn.classList.add('offline');
+            feedbackBtn.title = '作者に一言（オフライン）';
+        }
+    };
+
+    updateOnlineStatus();
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    feedbackBtn.addEventListener('click', () => {
+        if (navigator.onLine) {
+            showFeedbackModal();
+        }
+    });
+
+    container.appendChild(feedbackBtn);
+}
+
+// P70: フィードバックモーダルを表示
+function showFeedbackModal() {
+    const modal = createElement('div', 'feedback-modal');
+    const modalContent = createElement('div', 'feedback-modal-content');
+
+    const title = createElement('h2', '', '💬 作者に一言');
+    modalContent.appendChild(title);
+
+    // タブ切り替え
+    const tabContainer = createElement('div', 'feedback-tabs');
+    const bugReportTab = createButton('🐛 バグ報告', () => switchTab('bug'), 'feedback-tab active');
+    const feedbackTab = createButton('💡 要望・意見', () => switchTab('feedback'), 'feedback-tab');
+    const viewPostsTab = createButton('📋 投稿一覧', () => switchTab('posts'), 'feedback-tab');
+    tabContainer.appendChild(bugReportTab);
+    tabContainer.appendChild(feedbackTab);
+    tabContainer.appendChild(viewPostsTab);
+    modalContent.appendChild(tabContainer);
+
+    // コンテンツエリア
+    const contentArea = createElement('div', 'feedback-content-area');
+    modalContent.appendChild(contentArea);
+
+    function switchTab(tab) {
+        bugReportTab.classList.toggle('active', tab === 'bug');
+        feedbackTab.classList.toggle('active', tab === 'feedback');
+        viewPostsTab.classList.toggle('active', tab === 'posts');
+        renderTabContent(tab, contentArea);
+    }
+
+    // 初期表示
+    renderTabContent('bug', contentArea);
+
+    // 閉じるボタン
+    const closeBtn = createButton('閉じる', () => {
+        modal.remove();
+    }, 'btn btn-secondary');
+    modalContent.appendChild(closeBtn);
+
+    modal.appendChild(modalContent);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+
+    document.body.appendChild(modal);
+}
+
+// P70: タブコンテンツをレンダリング
+function renderTabContent(tab, container) {
+    container.innerHTML = '';
+
+    if (tab === 'bug') {
+        renderBugReportForm(container);
+    } else if (tab === 'feedback') {
+        renderFeedbackForm(container);
+    } else if (tab === 'posts') {
+        renderPostsList(container);
+    }
+}
+
+// P70: バグ報告フォーム
+function renderBugReportForm(container) {
+    // 「今！」ボタン
+    const nowBtn = createButton('🕐 今！（直近の状況を自動記載）', () => {
+        const historyText = getActionHistoryText();
+        const matchText = gameState.currentMatch ? getMatchStateText() : '';
+        bugTextarea.value = `【直近の操作履歴】\n${historyText}\n\n${matchText}\n\n【バグの詳細】\nここに詳細を記入してください`;
+    }, 'btn btn-info feedback-now-btn');
+    container.appendChild(nowBtn);
+
+    // テキストエリア
+    const bugTextarea = createElement('textarea', 'feedback-textarea');
+    bugTextarea.placeholder = 'バグの内容を記入してください...\n「今！」ボタンを押すと直近の操作履歴が自動で入力されます。';
+    bugTextarea.rows = 10;
+    container.appendChild(bugTextarea);
+
+    // ニックネーム入力
+    const nicknameLabel = createElement('label', '', 'ニックネーム（任意）: ');
+    const nicknameInput = createElement('input', 'feedback-nickname');
+    nicknameInput.type = 'text';
+    nicknameInput.placeholder = '匿名';
+    nicknameInput.value = localStorage.getItem('feedbackNickname') || '';
+    nicknameLabel.appendChild(nicknameInput);
+    container.appendChild(nicknameLabel);
+
+    // 投稿ボタン
+    const submitBtn = createButton('📤 投稿する', () => {
+        submitFeedback('バグ報告', bugTextarea.value, nicknameInput.value);
+    }, 'btn btn-primary feedback-submit-btn');
+    container.appendChild(submitBtn);
+}
+
+// P70: 要望・意見フォーム
+function renderFeedbackForm(container) {
+    // カテゴリ選択
+    const categoryLabel = createElement('label', '', 'カテゴリ: ');
+    const categorySelect = createElement('select', 'feedback-category');
+    const categories = [
+        { value: 'feature', label: '機能要望' },
+        { value: 'spec', label: '仕様修正' },
+        { value: 'newgame', label: '新ゲーム案' },
+        { value: 'other', label: '自由投稿' }
+    ];
+    categories.forEach(cat => {
+        const option = createElement('option');
+        option.value = cat.value;
+        option.textContent = cat.label;
+        categorySelect.appendChild(option);
+    });
+    categoryLabel.appendChild(categorySelect);
+    container.appendChild(categoryLabel);
+
+    // テキストエリア
+    const feedbackTextarea = createElement('textarea', 'feedback-textarea');
+    feedbackTextarea.placeholder = '要望・意見を記入してください...';
+    feedbackTextarea.rows = 8;
+    container.appendChild(feedbackTextarea);
+
+    // ニックネーム入力
+    const nicknameLabel = createElement('label', '', 'ニックネーム（任意）: ');
+    const nicknameInput = createElement('input', 'feedback-nickname');
+    nicknameInput.type = 'text';
+    nicknameInput.placeholder = '匿名';
+    nicknameInput.value = localStorage.getItem('feedbackNickname') || '';
+    nicknameLabel.appendChild(nicknameInput);
+    container.appendChild(nicknameLabel);
+
+    // 投稿ボタン
+    const submitBtn = createButton('📤 投稿する', () => {
+        const categoryText = categories.find(c => c.value === categorySelect.value)?.label || 'その他';
+        submitFeedback(categoryText, feedbackTextarea.value, nicknameInput.value);
+    }, 'btn btn-primary feedback-submit-btn');
+    container.appendChild(submitBtn);
+}
+
+// P70: 投稿一覧表示
+function renderPostsList(container) {
+    const loadingText = createElement('p', '', '投稿を読み込み中...');
+    container.appendChild(loadingText);
+
+    // GitHub Gistから投稿を取得
+    fetchPublicPosts().then(posts => {
+        container.innerHTML = '';
+
+        if (posts.length === 0) {
+            const noPostsText = createElement('p', 'feedback-no-posts', 'まだ投稿はありません。');
+            container.appendChild(noPostsText);
+            return;
+        }
+
+        posts.forEach(post => {
+            const card = createElement('div', 'feedback-card');
+
+            const cardHeader = createElement('div', 'feedback-card-header');
+            const categoryBadge = createElement('span', `feedback-badge ${post.category}`, post.categoryLabel);
+            const authorSpan = createElement('span', 'feedback-author', `👤 ${post.nickname || '匿名'}`);
+            const dateSpan = createElement('span', 'feedback-date', post.date);
+            cardHeader.appendChild(categoryBadge);
+            cardHeader.appendChild(authorSpan);
+            cardHeader.appendChild(dateSpan);
+            card.appendChild(cardHeader);
+
+            const cardBody = createElement('div', 'feedback-card-body');
+            cardBody.textContent = post.content;
+            card.appendChild(cardBody);
+
+            if (post.reply) {
+                const replyDiv = createElement('div', 'feedback-reply');
+                replyDiv.innerHTML = `<strong>💬 作者返信:</strong> ${post.reply}`;
+                card.appendChild(replyDiv);
+            }
+
+            container.appendChild(card);
+        });
+    }).catch(err => {
+        container.innerHTML = '';
+        const errorText = createElement('p', 'feedback-error', '投稿の読み込みに失敗しました。');
+        container.appendChild(errorText);
+        console.error('Failed to fetch posts:', err);
+    });
+}
+
+// P70: 投稿を送信（Google Formsへ）
+function submitFeedback(category, content, nickname) {
+    if (!content.trim()) {
+        showToast('内容を入力してください', 'error');
+        return;
+    }
+
+    // ニックネームを保存
+    if (nickname) {
+        localStorage.setItem('feedbackNickname', nickname);
+    }
+
+    // Google Forms URL（ユーザーが設定する必要あり）
+    const GOOGLE_FORM_URL = CONFIG.FEEDBACK?.GOOGLE_FORM_URL;
+
+    if (!GOOGLE_FORM_URL) {
+        // Google Formsが設定されていない場合、投稿内容をコピー可能にする
+        const postData = `【カテゴリ】${category}\n【ニックネーム】${nickname || '匿名'}\n【内容】\n${content}`;
+
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(postData).then(() => {
+                showToast('投稿内容をクリップボードにコピーしました。\n作者への連絡方法は別途ご確認ください。', 'info');
+            });
+        } else {
+            console.log('投稿内容:', postData);
+            showToast('投稿機能は現在準備中です', 'info');
+        }
+        return;
+    }
+
+    // Google Formsに送信
+    const formData = new FormData();
+    formData.append('entry.category', category);
+    formData.append('entry.nickname', nickname || '匿名');
+    formData.append('entry.content', content);
+    formData.append('entry.timestamp', new Date().toISOString());
+
+    fetch(GOOGLE_FORM_URL, {
+        method: 'POST',
+        body: formData,
+        mode: 'no-cors'
+    }).then(() => {
+        showToast('投稿しました！ありがとうございます。', 'success');
+    }).catch(err => {
+        showToast('投稿に失敗しました', 'error');
+        console.error('Submit error:', err);
+    });
+}
+
+// P70: 公開投稿を取得（GitHub Gistから）
+async function fetchPublicPosts() {
+    const GIST_URL = CONFIG.FEEDBACK?.GIST_URL;
+
+    if (!GIST_URL) {
+        // Gistが設定されていない場合、サンプルデータを返す
+        return [
+            {
+                id: 'sample1',
+                category: 'feature',
+                categoryLabel: '機能要望',
+                nickname: 'サンプル',
+                date: '2026-01-05',
+                content: 'これはサンプル投稿です。実際の投稿はGitHub Gistから読み込まれます。',
+                reply: null
+            }
+        ];
+    }
+
+    try {
+        const response = await fetch(GIST_URL);
+        const data = await response.json();
+        return data.posts || [];
+    } catch (err) {
+        console.error('Failed to fetch posts:', err);
+        return [];
+    }
+}
+
+// P70: トースト通知を表示
+function showToast(message, type = 'info') {
+    const toast = createElement('div', `toast toast-${type}`);
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // フェードイン
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // 3秒後に消える
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 // 画面に応じたBGMを再生

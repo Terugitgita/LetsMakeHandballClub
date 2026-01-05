@@ -1,7 +1,7 @@
 // match.js - Match Simulation System (Position-Based)
 
 import { CONFIG } from './config.js';
-import { gameState, getEffectiveStats } from './gameState.js';
+import { gameState, getEffectiveStats, recordAction } from './gameState.js';
 import { assetManager } from './assets.js';
 import {
     distance,
@@ -305,6 +305,12 @@ export class MatchSimulator {
         this.isRunning = true;
         this.lastTime = performance.now();
         this.animate();
+
+        // P70: アクション履歴に試合開始を記録
+        recordAction('matchStart', {
+            opponent: this.opponent.prefecture,
+            isFinalBoss: this.isFinalBoss
+        });
     }
 
     stop() {
@@ -1735,6 +1741,12 @@ export class MatchSimulator {
             change: team === 'player' ? '+1 player' : '+1 opponent'
         });
 
+        // P70: アクション履歴に記録（バグ報告用）
+        recordAction('goal', {
+            team: team,
+            score: { ...this.score }
+        });
+
         if (this.onScoreCallback) {
             console.log('Calling onScoreCallback');
             this.onScoreCallback(this.score);
@@ -1782,6 +1794,13 @@ export class MatchSimulator {
             hasCallback: !!this.onMatchEndCallback
         });
         this.stop();
+
+        // P70: アクション履歴に試合終了を記録
+        recordAction('matchEnd', {
+            result: result,
+            score: { ...this.score },
+            opponent: this.opponent.prefecture
+        });
         if (this.onMatchEndCallback) {
             console.log('Calling onMatchEndCallback with:', {
                 score: this.score,

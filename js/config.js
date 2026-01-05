@@ -601,6 +601,22 @@ export const BACKGROUND_CONFIG = {
     FALLBACK: "#f0f0f0"
 };
 
+// P70: Feedback System Configuration
+export const FEEDBACK_CONFIG = {
+    // Google FormsのURL（実際のフォームURLに置き換えてください）
+    GOOGLE_FORM_URL: null,
+    // GitHub GistのURL（公開投稿を読み込むためのURL）
+    GIST_URL: null,
+    // Google Formsのエントリーフィールド名
+    FORM_FIELDS: {
+        CATEGORY: 'entry.category',
+        NICKNAME: 'entry.nickname',
+        CONTENT: 'entry.content',
+        TIMESTAMP: 'entry.timestamp',
+        ACTION_HISTORY: 'entry.actionHistory'
+    }
+};
+
 // Unified CONFIG export
 export const CONFIG = {
     PLAYER_TEAM,
@@ -631,5 +647,6 @@ export const CONFIG = {
     TEAM_NAME_FORMAT,
     DEBUG: DEBUG_CONFIG,
     BACKGROUND: BACKGROUND_CONFIG,
-    ABILITIES: POSITION_ABILITIES
+    ABILITIES: POSITION_ABILITIES,
+    FEEDBACK: FEEDBACK_CONFIG
 };

@@ -1,0 +1,16 @@
+# Admin folder (local only - not for GitHub)
+admin/
+
+# Node modules
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
